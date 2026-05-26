@@ -10,6 +10,12 @@ from app.audit.events import (
     create_retrieval_audit_event,
 )
 from app.guardrails.input_checks import analyze_user_input
+from app.mcp_bridge.client import (
+    create_ticket_draft,
+    get_customer_context,
+    request_approval,
+    validate_tool_mode,
+)
 from app.rag.chunking import split_into_chunks
 from app.rag.documents import load_sample_documents
 from app.rag.retrieval import retrieve_keyword_matches
@@ -43,21 +49,11 @@ def classify_incident(message: str, severity_hint: str | None = None) -> dict[st
 
 
 def create_local_ticket_draft(summary: str, severity: str) -> dict[str, str]:
-    return {
-        "status": "draft",
-        "summary": summary,
-        "severity": severity,
-        "next_step": "Human review required before creating a real ticket.",
-    }
+    return create_ticket_draft(summary, severity, tool_mode="local")  # type: ignore[return-value]
 
 
 def create_local_approval_request(action: str, reason: str) -> dict[str, str]:
-    return {
-        "status": "approval_required",
-        "action": action,
-        "reason": reason,
-        "approval_channel": "synthetic-manager-review",
-    }
+    return request_approval(action, reason, tool_mode="local")  # type: ignore[return-value]
 
 
 def blocked_answer(message: str) -> dict[str, object]:
@@ -76,6 +72,7 @@ def blocked_answer(message: str) -> dict[str, object]:
 
 def run_incident_support_workflow(request: dict[str, object]) -> dict[str, object]:
     message = str(request.get("message", ""))
+    tool_mode = validate_tool_mode(str(request.get("tool_mode", "local")))
     severity_hint = request.get("severity_hint")
     severity_hint_value = str(severity_hint) if severity_hint is not None else None
     workflow_id = str(uuid4())
@@ -103,6 +100,7 @@ def run_incident_support_workflow(request: dict[str, object]) -> dict[str, objec
                 subject=workflow_type,
                 metadata={
                     "workflow_type": workflow_type,
+                    "tool_mode": tool_mode,
                     "risk_level": guardrail_result["risk_level"],
                     "flags": guardrail_result["flags"],
                     "requires_human_review": True,
@@ -123,10 +121,10 @@ def run_incident_support_workflow(request: dict[str, object]) -> dict[str, objec
                 "next_step": "Human review required before any follow-up action.",
             },
             "approval_request": {
-                "status": "approval_required",
+                "status": "pending",
                 "action": "review_blocked_workflow",
                 "reason": "Guardrail checks blocked the incident-support workflow.",
-                "approval_channel": "synthetic-manager-review",
+                "requires_human_review": True,
             },
             "audit_events": audit_events,
             "limitations": [
@@ -144,6 +142,7 @@ def run_incident_support_workflow(request: dict[str, object]) -> dict[str, objec
             subject=workflow_type,
             metadata={
                 "workflow_type": workflow_type,
+                "tool_mode": tool_mode,
                 "classification_intent": classification["intent"],
                 "classification_severity": classification["severity"],
                 "requires_human_review": classification["requires_approval"],
@@ -172,9 +171,23 @@ def run_incident_support_workflow(request: dict[str, object]) -> dict[str, objec
         )
     )
 
-    ticket_draft = create_local_ticket_draft(
+    customer_context = get_customer_context(str(request.get("customer_id")), tool_mode=tool_mode)
+    audit_events.append(
+        create_audit_event(
+            event_type="customer_context",
+            status="completed",
+            subject=workflow_type,
+            metadata={
+                "workflow_type": workflow_type,
+                "tool_mode": tool_mode,
+            },
+        )
+    )
+
+    ticket_draft = create_ticket_draft(
         summary=f"{classification['intent']} workflow draft for {request.get('customer_id')}",
         severity=str(classification["severity"]),
+        tool_mode=tool_mode,
     )
     audit_events.append(
         create_audit_event(
@@ -183,6 +196,7 @@ def run_incident_support_workflow(request: dict[str, object]) -> dict[str, objec
             subject=workflow_type,
             metadata={
                 "workflow_type": workflow_type,
+                "tool_mode": tool_mode,
                 "ticket_status": ticket_draft["status"],
                 "classification_severity": classification["severity"],
                 "requires_human_review": True,
@@ -190,9 +204,10 @@ def run_incident_support_workflow(request: dict[str, object]) -> dict[str, objec
         )
     )
 
-    approval_request = create_local_approval_request(
+    approval_request = request_approval(
         action="review_incident_support_draft",
         reason="All incident-support workflow outputs require approval before external action.",
+        tool_mode=tool_mode,
     )
     audit_events.append(
         create_audit_event(
@@ -201,6 +216,7 @@ def run_incident_support_workflow(request: dict[str, object]) -> dict[str, objec
             subject=workflow_type,
             metadata={
                 "workflow_type": workflow_type,
+                "tool_mode": tool_mode,
                 "approval_status": approval_request["status"],
                 "requires_human_review": True,
             },
@@ -214,6 +230,7 @@ def run_incident_support_workflow(request: dict[str, object]) -> dict[str, objec
         "classification": classification,
         "guardrail_result": guardrail_result,
         "answer_draft": answer_draft,
+        "customer_context": customer_context,
         "ticket_draft": ticket_draft,
         "approval_request": approval_request,
         "audit_events": audit_events,

@@ -5,6 +5,7 @@ description = "FastAPI backend for the enterprise AI agent reference stack."
 requires-python = ">=3.11"
 dependencies = [
     "fastapi>=0.111.0",
+    "mcp[cli]>=1.0.0",
     "uvicorn[standard]>=0.30.0",
 ]
 
@@ -22,4 +23,3 @@ pythonpath = ["."]
 [tool.ruff]
 line-length = 100
 target-version = "py311"
-

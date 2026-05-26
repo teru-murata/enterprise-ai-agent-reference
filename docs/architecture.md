@@ -216,6 +216,30 @@ M5 implements the MCP server side only. The M4 agent still calls local determini
 
 The MCP policy server is now an official FastMCP stdio server for synthetic policy lookup, ticket draft creation, approval requests, and synthetic customer context. The incident-support agent will call it through an MCP client bridge in a later phase.
 
+## M6 MCP Client Bridge
+
+The incident-support workflow can route tool-like actions through an MCP bridge:
+
+```text
+incident-support agent
+        |
+        v
+ MCP client bridge
+        |
+        +--> local deterministic mode
+        |
+        +--> stdio MCP mode
+                |
+                v
+        MCP policy/action server
+                |
+                +--> create_ticket_draft
+                +--> request_approval
+                +--> get_customer_context
+```
+
+Local mode is the default for normal CI. Stdio mode is available through `tool_mode: "mcp-stdio"` and explicit validation scripts.
+
 The dataset is intentionally synthetic and small. It supports local demos, ingestion scaffolding, and evaluation examples without exposing customer or production data.
 
 The AWS plan targets ECS Fargate, RDS PostgreSQL with pgvector, S3, ALB, Secrets Manager, CloudWatch, GitHub Actions, and Terraform. No AWS resources are created by the current repository.

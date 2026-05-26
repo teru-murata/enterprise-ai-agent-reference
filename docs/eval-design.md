@@ -108,3 +108,5 @@ M5 adds an official MCP SDK server, but protocol-level and agent-to-MCP evals ar
 - safe blocked behavior when guardrails trigger.
 - no side-effect execution.
 - synthetic-only customer context.
+
+M6 adds a local/default MCP bridge path plus an explicit stdio integration path. Future workflow and tool-call evals should also verify that blocked input avoids tool calls and that audit events fully capture bridge mode, tool intent, and approval state.

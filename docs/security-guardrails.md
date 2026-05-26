@@ -54,4 +54,15 @@ The MCP policy/action server is local and stdio-only in this phase:
 - Tools must not read or return secrets.
 - Streamable HTTP is deferred until authentication, authorization, and origin validation are designed.
 
+## M6 MCP Bridge Safety
+
+The MCP client bridge preserves the same action boundary:
+
+- Guardrails run before any tool use.
+- Guardrail-blocked input does not call local or MCP tools.
+- Tool actions remain synthetic and draft-only.
+- Approval remains mandatory.
+- Normal CI uses deterministic local mode.
+- Stdio MCP validation is explicit and does not call external APIs.
+
 Future production work should add authentication, authorization, least-privilege service roles, structured audit events, retention controls, and security review before deployment.

@@ -18,6 +18,7 @@ SAFE_METADATA_KEYS = {
     "citation_count",
     "retrieved_count",
     "ticket_status",
+    "tool_mode",
     "workflow_type",
 }
 
