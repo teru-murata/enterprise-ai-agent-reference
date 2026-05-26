@@ -102,3 +102,24 @@ terraform validate
 ```
 
 The Terraform files are placeholders only. They do not create real AWS resources yet.
+
+## M1 Placeholder RAG
+
+The backend includes a minimal local RAG foundation for the synthetic markdown corpus:
+
+```text
+datasets/sample_docs -> document loader -> deterministic chunker -> keyword retriever -> GET /rag/search
+```
+
+Example:
+
+```bash
+cd apps/api
+uvicorn app.main:app --reload
+```
+
+```bash
+curl "http://127.0.0.1:8000/rag/search?query=severity%20incident%20commander"
+```
+
+Retrieval is currently keyword-based and deterministic. It does not use embeddings, OpenAI APIs, pgvector, LangChain, LlamaIndex, or external services. Embedding-based retrieval and pgvector storage are planned for a later phase.
