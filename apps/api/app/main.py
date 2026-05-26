@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
+from app.agents.incident_support import run_incident_support_workflow
 from app.answers.composer import compose_grounded_answer
 from app.audit.events import (
     create_answer_draft_audit_event,
@@ -27,6 +28,12 @@ app = FastAPI(
 
 class AnswerDraftRequest(BaseModel):
     question: str
+
+
+class IncidentSupportRequest(BaseModel):
+    message: str
+    customer_id: str = "synthetic-customer-001"
+    severity_hint: str | None = None
 
 
 @app.get("/health")
@@ -80,6 +87,14 @@ def rag_search(query: str) -> dict[str, object]:
         "guardrail_result": guardrail_result,
         "audit_events": audit_events,
     }
+
+
+@app.post("/agent/incident-support")
+def incident_support(request: IncidentSupportRequest) -> dict[str, object]:
+    if not request.message.strip():
+        raise HTTPException(status_code=400, detail="message must not be empty")
+
+    return run_incident_support_workflow(request.model_dump())
 
 
 @app.post("/answers/draft")

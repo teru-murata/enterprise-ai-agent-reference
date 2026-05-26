@@ -185,3 +185,17 @@ Current behavior:
 - No real tool execution occurs.
 
 Audit metadata is intentionally limited to safe fields such as input length, result count, risk level, flags, retrieval mode, citation count, and human-review status. It does not include full user input or secrets.
+
+## M4 Deterministic Agent Workflow
+
+The backend includes a deterministic incident-support workflow endpoint:
+
+```bash
+curl -X POST "http://127.0.0.1:8000/agent/incident-support" \
+  -H "Content-Type: application/json" \
+  -d "{\"message\":\"Severity 2 incident degradation affecting support workflows\",\"customer_id\":\"synthetic-customer-001\",\"severity_hint\":\"medium\"}"
+```
+
+The workflow orchestrates guardrail analysis, deterministic incident classification, keyword RAG retrieval, grounded answer drafting, synthetic ticket draft creation, synthetic approval request creation, and audit-event emission.
+
+All actions are draft-only and require human approval. The workflow does not call models, execute real tools, create real tickets, contact external systems, or persist audit events.

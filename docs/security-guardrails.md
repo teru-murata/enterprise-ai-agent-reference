@@ -33,4 +33,14 @@ The local API uses deterministic heuristic checks for:
 
 These guardrails are heuristic scaffolds only. They are not a replacement for enterprise authentication, authorization, DLP, IAM, SIEM integration, policy engines, legal review, or full GRC controls.
 
+## M4 Action Safety
+
+The deterministic incident-support workflow keeps action safety explicit:
+
+- No autonomous execution is allowed.
+- Ticket creation is draft-only.
+- Approval is mandatory for every workflow.
+- Guardrail-blocked messages do not trigger retrieval, normal answer drafting, or normal ticket drafting.
+- Audit events are emitted for guardrail checks, classification, retrieval, answer drafting, ticket drafting, and approval requests.
+
 Future production work should add authentication, authorization, least-privilege service roles, structured audit events, retention controls, and security review before deployment.

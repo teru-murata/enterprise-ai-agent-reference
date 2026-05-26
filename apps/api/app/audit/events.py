@@ -5,6 +5,9 @@ from uuid import uuid4
 
 
 SAFE_METADATA_KEYS = {
+    "approval_status",
+    "classification_intent",
+    "classification_severity",
     "query_length",
     "question_length",
     "result_count",
@@ -14,6 +17,8 @@ SAFE_METADATA_KEYS = {
     "requires_human_review",
     "citation_count",
     "retrieved_count",
+    "ticket_status",
+    "workflow_type",
 }
 
 

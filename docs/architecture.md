@@ -162,6 +162,37 @@ user input
 
 Audit events are generated as response objects only. Persistent audit storage, correlation IDs across services, retention policies, and CloudWatch/SIEM integration are planned for later phases.
 
+## M4 Deterministic Agent Workflow
+
+The incident-support workflow demonstrates agent orchestration without model calls or real tool execution:
+
+```text
+user message
+        |
+        v
+ guardrails
+        |
+        v
+ incident classification
+        |
+        v
+ retrieval
+        |
+        v
+ grounded answer draft
+        |
+        v
+ ticket draft
+        |
+        v
+ approval request
+        |
+        v
+ audit events
+```
+
+The current ticket and approval steps are local placeholders. Real MCP protocol integration, external tool execution, and persistent audit storage are planned later.
+
 The MCP policy server is currently a plain Python module. It simulates enterprise policy lookup, ticket draft creation, and approval request generation. Phase 2 will wrap these functions in an MCP-compatible server.
 
 The dataset is intentionally synthetic and small. It supports local demos, ingestion scaffolding, and evaluation examples without exposing customer or production data.

@@ -31,6 +31,9 @@ Build a minimal but realistic enterprise AI agent reference stack for internal i
 - Do not bypass guardrails.
 - Do not remove the human review requirement.
 - Do not include raw secrets or full user input in audit metadata.
+- Agent workflows must not bypass guardrails.
+- Agent workflows must not perform real external actions.
+- Agent workflows must preserve mandatory human approval.
 
 ## Backend Commands
 
@@ -64,7 +67,7 @@ ruff check .
 
 After changes, run the focused commands for touched areas and then the full local validation when dependencies are installed.
 
-Run evals after any RAG, retrieval, chunking, document loading, answer composition, guardrail, audit, or eval logic change:
+Run evals after any RAG, retrieval, chunking, document loading, answer composition, guardrail, audit, agent workflow, or eval logic change:
 
 ```bash
 python scripts/run_evals.py

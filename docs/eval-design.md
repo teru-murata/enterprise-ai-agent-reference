@@ -86,3 +86,15 @@ The groundedness proxy is not a full factuality metric. It only checks determini
 The retrieval and answer-quality eval thresholds must continue to pass after guardrail and audit integration. Guardrails should not weaken citation coverage, human review enforcement, insufficient-evidence behavior, or retrieval hit rates for answerable cases.
 
 Future guardrail eval dimensions can include precision and recall for prompt-injection detection, secret-extraction detection, unsafe tool-intent detection, false-positive rate on safe queries, and audit metadata completeness.
+
+## M4 Workflow Evaluation Direction
+
+Current evals continue to cover retrieval quality and deterministic answer quality. The incident-support workflow is covered by unit and API tests in this phase.
+
+Future workflow evals should measure:
+
+- correct incident classification.
+- approval enforcement.
+- safe blocked behavior for guardrail-triggering inputs.
+- audit event completeness.
+- draft-only behavior for ticket and tool-like actions.
