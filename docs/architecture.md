@@ -135,6 +135,33 @@ datasets/golden_eval_set.jsonl
 
 This eval path is deterministic and local. It does not use LLM-as-a-judge.
 
+## M3 Guardrail And Audit Flow
+
+API requests now pass through deterministic guardrail checks before retrieval or answer drafting:
+
+```text
+user input
+        |
+        v
+ guardrail analysis
+        |
+        +--> blocked safety response or 403
+        |
+        v
+ keyword retrieval
+        |
+        v
+ answer composition
+        |
+        v
+ audit events
+        |
+        v
+ API response
+```
+
+Audit events are generated as response objects only. Persistent audit storage, correlation IDs across services, retention policies, and CloudWatch/SIEM integration are planned for later phases.
+
 The MCP policy server is currently a plain Python module. It simulates enterprise policy lookup, ticket draft creation, and approval request generation. Phase 2 will wrap these functions in an MCP-compatible server.
 
 The dataset is intentionally synthetic and small. It supports local demos, ingestion scaffolding, and evaluation examples without exposing customer or production data.

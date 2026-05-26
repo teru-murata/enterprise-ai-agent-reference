@@ -80,3 +80,9 @@ The current answer-quality metrics are:
 - groundedness proxy: answerable cases pass when the answer has citations and overlaps with retrieved context terms.
 
 The groundedness proxy is not a full factuality metric. It only checks deterministic overlap with retrieved context.
+
+## M3 Guardrail And Audit Validation
+
+The retrieval and answer-quality eval thresholds must continue to pass after guardrail and audit integration. Guardrails should not weaken citation coverage, human review enforcement, insufficient-evidence behavior, or retrieval hit rates for answerable cases.
+
+Future guardrail eval dimensions can include precision and recall for prompt-injection detection, secret-extraction detection, unsafe tool-intent detection, false-positive rate on safe queries, and audit metadata completeness.

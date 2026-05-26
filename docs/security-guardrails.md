@@ -19,4 +19,18 @@ The current answer composer creates deterministic drafts from retrieved syntheti
 
 The current answer-quality eval includes an insufficient-evidence case as an anti-hallucination guardrail. It also checks that every draft keeps `requires_human_review` enabled.
 
+## Current M3 Guardrail Categories
+
+The local API uses deterministic heuristic checks for:
+
+- Prompt injection: phrases such as requests to ignore instructions, reveal system prompts, show hidden instructions, bypass policy, or expose developer messages.
+- Credential and secret extraction: phrases involving API keys, passwords, secret tokens, or private keys.
+- Unsafe tool execution intent: phrases asking to execute without approval, delete records, disable audit, or skip human review.
+- Insufficient evidence handling: answer drafts return an insufficient-evidence response when retrieval finds no supporting chunks.
+- Human review enforcement: every answer draft and safety response keeps `requires_human_review: true`.
+
+## Limitations
+
+These guardrails are heuristic scaffolds only. They are not a replacement for enterprise authentication, authorization, DLP, IAM, SIEM integration, policy engines, legal review, or full GRC controls.
+
 Future production work should add authentication, authorization, least-privilege service roles, structured audit events, retention controls, and security review before deployment.

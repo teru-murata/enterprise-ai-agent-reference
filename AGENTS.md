@@ -28,6 +28,9 @@ Build a minimal but realistic enterprise AI agent reference stack for internal i
 - Answer composition must not invent facts beyond retrieved context.
 - Generated answers that use retrieved context must include citations.
 - Human review remains required for answer drafts until a later phase explicitly changes this.
+- Do not bypass guardrails.
+- Do not remove the human review requirement.
+- Do not include raw secrets or full user input in audit metadata.
 
 ## Backend Commands
 
@@ -61,7 +64,7 @@ ruff check .
 
 After changes, run the focused commands for touched areas and then the full local validation when dependencies are installed.
 
-Run evals after any RAG, retrieval, chunking, document loading, answer composition, or eval logic change:
+Run evals after any RAG, retrieval, chunking, document loading, answer composition, guardrail, audit, or eval logic change:
 
 ```bash
 python scripts/run_evals.py

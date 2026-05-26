@@ -171,3 +171,17 @@ Current answer metrics:
 The current thresholds require retrieval hit@3, citation coverage, human review rate, and insufficient-evidence success rate to be `1.0`; expected term coverage must be at least `0.5`.
 
 LLM-as-a-judge, factuality grading, and model-based answer evaluation are planned for a later phase and are not active.
+
+## M3 Guardrails and Audit Events
+
+The API now runs deterministic heuristic guardrail checks before retrieval and answer drafting. The current checks flag prompt-injection phrases, credential or secret extraction attempts, and unsafe tool-execution intent.
+
+Current behavior:
+
+- `GET /rag/search` returns `403` for high-risk blocked queries.
+- `POST /answers/draft` returns a deterministic safety response for high-risk questions, with no retrieval and no normal answer composition.
+- Successful retrieval and answer responses include `guardrail_result` and `audit_events`.
+- Audit events are returned in responses but are not persisted yet.
+- No real tool execution occurs.
+
+Audit metadata is intentionally limited to safe fields such as input length, result count, risk level, flags, retrieval mode, citation count, and human-review status. It does not include full user input or secrets.
