@@ -62,7 +62,7 @@ Invoke-Step "Frontend build" {
     }
 }
 
-Invoke-Step "Placeholder scripts" {
+Invoke-Step "Dataset ingest and retrieval evals" {
     Push-Location $RepoRoot
     try {
         & $Python scripts/ingest_docs.py

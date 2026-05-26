@@ -21,5 +21,27 @@ The evaluation pipeline is planned around deterministic synthetic examples first
 - An approval-required ticket/action flow.
 - An access-control-sensitive query.
 
-`scripts/run_evals.py` currently reads the cases and prints the planned checks. Future phases can add retrieval assertions, model-graded groundedness, rule-based safety checks, and CI reporting.
+Each case includes:
 
+- `id`: stable case identifier.
+- `query`: synthetic user query.
+- `expected_documents`: source document filenames that should appear in retrieval results.
+- `expected_terms`: terms that explain why the query should match the expected documents.
+- `category`: scenario category.
+- `notes`: short reviewer note.
+
+## M1.5 Retrieval Evaluation
+
+`scripts/run_evals.py` now runs deterministic retrieval evaluation over the placeholder keyword retriever.
+
+The evaluation computes:
+
+- hit@1: whether any expected document appears in the first retrieved result.
+- hit@3: whether any expected document appears in the top three retrieved results.
+- MRR: mean reciprocal rank for the first expected document.
+
+The current quality gate requires hit@3 to be `1.0`. This is intentionally strict because the corpus and eval set are small, synthetic, and deterministic.
+
+Retrieval quality is evaluated before answer generation quality because bad retrieval makes grounded answer evaluation misleading. If the expected source document is missing from context, answer correctness, groundedness, and citation quality failures may be retrieval failures rather than generation failures.
+
+Future phases can add answer correctness checks, model-graded groundedness, citation validation, policy compliance assertions, latency tracking, and cost reporting.

@@ -58,6 +58,12 @@ ruff check .
 
 After changes, run the focused commands for touched areas and then the full local validation when dependencies are installed.
 
+Run retrieval evals after any RAG, retrieval, chunking, document loading, or eval dataset change:
+
+```bash
+python scripts/run_evals.py
+```
+
 ```powershell
 .\scripts\check.ps1
 ```
@@ -66,7 +72,7 @@ After changes, run the focused commands for touched areas and then the full loca
 ./scripts/check.sh
 ```
 
-The full validation runs backend tests, MCP tests, frontend typecheck, frontend build, and placeholder dataset/eval scripts. Do not hide failing checks with unconditional success.
+The full validation runs backend tests, MCP tests, frontend typecheck, frontend build, and deterministic retrieval eval scripts. Do not hide failing checks with unconditional success.
 
 ## Infra Commands
 

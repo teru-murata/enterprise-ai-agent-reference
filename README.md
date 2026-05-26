@@ -123,3 +123,21 @@ curl "http://127.0.0.1:8000/rag/search?query=severity%20incident%20commander"
 ```
 
 Retrieval is currently keyword-based and deterministic. It does not use embeddings, OpenAI APIs, pgvector, LangChain, LlamaIndex, or external services. Embedding-based retrieval and pgvector storage are planned for a later phase.
+
+## M1.5 Retrieval Evaluation
+
+`scripts/run_evals.py` runs deterministic retrieval evaluation against `datasets/golden_eval_set.jsonl`. The eval checks whether the keyword retriever returns the expected synthetic source documents for known queries.
+
+Current metrics:
+
+- hit@1: fraction of cases where an expected document is the first retrieved result.
+- hit@3: fraction of cases where an expected document appears in the top three retrieved results.
+- MRR: mean reciprocal rank of the first expected document in the retrieved results.
+
+The script fails with a non-zero exit code if hit@3 is below `1.0`.
+
+```bash
+python scripts/run_evals.py
+```
+
+This is retrieval evaluation only. It deliberately runs before LLM-based answer evaluation so retrieval quality can be validated without model calls, embeddings, external APIs, or non-deterministic judges.
