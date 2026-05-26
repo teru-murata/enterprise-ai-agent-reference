@@ -113,6 +113,28 @@ user question
 
 The composer does not call an LLM and does not infer facts beyond retrieved snippets. If no chunks are retrieved, it returns an insufficient-evidence response.
 
+## M2.5 Answer Eval Flow
+
+Answer-quality evaluation runs the synthetic golden set through retrieval and answer composition:
+
+```text
+datasets/golden_eval_set.jsonl
+        |
+        v
+ keyword RAG retrieval
+        |
+        v
+ answer composer
+        |
+        v
+ citation coverage + expected terms + review checks
+        |
+        v
+ CI and local check script
+```
+
+This eval path is deterministic and local. It does not use LLM-as-a-judge.
+
 The MCP policy server is currently a plain Python module. It simulates enterprise policy lookup, ticket draft creation, and approval request generation. Phase 2 will wrap these functions in an MCP-compatible server.
 
 The dataset is intentionally synthetic and small. It supports local demos, ingestion scaffolding, and evaluation examples without exposing customer or production data.

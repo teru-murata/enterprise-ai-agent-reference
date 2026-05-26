@@ -155,3 +155,19 @@ curl -X POST "http://127.0.0.1:8000/answers/draft" \
 The endpoint retrieves synthetic markdown chunks with the keyword retriever, then composes a concise draft from those retrieved snippets. Model calls are disabled. The draft includes citations, limitations, confidence, retrieval mode, retrieved count, and `requires_human_review: true`.
 
 Every answer is explicitly a draft generated from retrieved context. It must not be treated as an autonomous final answer, and it requires human review before use in any operational workflow.
+
+## M2.5 Answer Quality Evaluation
+
+`scripts/run_evals.py` now runs deterministic answer-quality checks after retrieval evaluation. These are heuristic checks for the current placeholder answer composer, not LLM-as-a-judge.
+
+Current answer metrics:
+
+- citation coverage: answerable cases pass when citations include an expected source document.
+- expected term coverage: fraction of expected answer terms found in the draft answer.
+- human review rate: fraction of drafts that require human review.
+- insufficient evidence success rate: unanswerable cases pass when the draft says evidence is insufficient, has low confidence, and has no unrelated citations.
+- groundedness proxy: answerable cases pass when the draft has citations and overlaps with retrieved context terms.
+
+The current thresholds require retrieval hit@3, citation coverage, human review rate, and insufficient-evidence success rate to be `1.0`; expected term coverage must be at least `0.5`.
+
+LLM-as-a-judge, factuality grading, and model-based answer evaluation are planned for a later phase and are not active.

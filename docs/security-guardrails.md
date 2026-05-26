@@ -17,4 +17,6 @@ The current MCP policy server functions return local dictionaries only. They do 
 
 The current answer composer creates deterministic drafts from retrieved synthetic context only. All answer drafts require human review, no tool execution is performed by answer composition, and an insufficient-evidence response is returned when no supporting context is retrieved.
 
+The current answer-quality eval includes an insufficient-evidence case as an anti-hallucination guardrail. It also checks that every draft keeps `requires_human_review` enabled.
+
 Future production work should add authentication, authorization, least-privilege service roles, structured audit events, retention controls, and security review before deployment.

@@ -15,6 +15,9 @@ class RetrievalEvalCase:
     query: str
     expected_documents: list[str]
     expected_terms: list[str]
+    expected_answer_terms: list[str]
+    requires_citations: bool
+    expects_insufficient_evidence: bool
     category: str
     notes: str
 
@@ -35,6 +38,11 @@ def load_eval_cases(path: Path | None = None) -> list[RetrievalEvalCase]:
                         query=raw_case["query"],
                         expected_documents=list(raw_case["expected_documents"]),
                         expected_terms=list(raw_case.get("expected_terms", [])),
+                        expected_answer_terms=list(raw_case.get("expected_answer_terms", [])),
+                        requires_citations=bool(raw_case.get("requires_citations", True)),
+                        expects_insufficient_evidence=bool(
+                            raw_case.get("expects_insufficient_evidence", False)
+                        ),
                         category=raw_case["category"],
                         notes=raw_case.get("notes", ""),
                     )
@@ -70,6 +78,8 @@ def run_retrieval_eval(top_k: int = 3) -> dict[str, object]:
     chunks = split_into_chunks(documents)
 
     per_case: list[dict[str, object]] = []
+    answerable_cases = 0
+    insufficient_evidence_cases = 0
     hit_at_1_count = 0
     hit_at_3_count = 0
     reciprocal_rank_total = 0.0
@@ -77,13 +87,20 @@ def run_retrieval_eval(top_k: int = 3) -> dict[str, object]:
     for case in cases:
         results = retrieve_keyword_matches(case.query, chunks, limit=max(top_k, 3))
         retrieved_documents = [result_document_name(result) for result in results]
-        case_hit_at_1 = hit_at_k(case.expected_documents, retrieved_documents, 1)
-        case_hit_at_3 = hit_at_k(case.expected_documents, retrieved_documents, 3)
-        case_reciprocal_rank = reciprocal_rank(case.expected_documents, retrieved_documents)
+        is_answerable = bool(case.expected_documents)
+        case_hit_at_1 = hit_at_k(case.expected_documents, retrieved_documents, 1) if is_answerable else False
+        case_hit_at_3 = hit_at_k(case.expected_documents, retrieved_documents, 3) if is_answerable else False
+        case_reciprocal_rank = (
+            reciprocal_rank(case.expected_documents, retrieved_documents) if is_answerable else 0.0
+        )
 
-        hit_at_1_count += int(case_hit_at_1)
-        hit_at_3_count += int(case_hit_at_3)
-        reciprocal_rank_total += case_reciprocal_rank
+        if is_answerable:
+            answerable_cases += 1
+            hit_at_1_count += int(case_hit_at_1)
+            hit_at_3_count += int(case_hit_at_3)
+            reciprocal_rank_total += case_reciprocal_rank
+        else:
+            insufficient_evidence_cases += 1
 
         per_case.append(
             {
@@ -91,6 +108,7 @@ def run_retrieval_eval(top_k: int = 3) -> dict[str, object]:
                 "query": case.query,
                 "category": case.category,
                 "expected_documents": case.expected_documents,
+                "answerable": is_answerable,
                 "retrieved_documents": retrieved_documents,
                 "hit_at_1": case_hit_at_1,
                 "hit_at_3": case_hit_at_3,
@@ -103,6 +121,8 @@ def run_retrieval_eval(top_k: int = 3) -> dict[str, object]:
     if total_cases == 0:
         return {
             "total_cases": 0,
+            "answerable_cases": 0,
+            "insufficient_evidence_cases": 0,
             "hit_at_1": 0.0,
             "hit_at_3": 0.0,
             "mean_reciprocal_rank": 0.0,
@@ -111,9 +131,13 @@ def run_retrieval_eval(top_k: int = 3) -> dict[str, object]:
 
     return {
         "total_cases": total_cases,
-        "hit_at_1": hit_at_1_count / total_cases,
-        "hit_at_3": hit_at_3_count / total_cases,
-        "mean_reciprocal_rank": reciprocal_rank_total / total_cases,
+        "answerable_cases": answerable_cases,
+        "insufficient_evidence_cases": insufficient_evidence_cases,
+        "hit_at_1": hit_at_1_count / answerable_cases if answerable_cases else 0.0,
+        "hit_at_3": hit_at_3_count / answerable_cases if answerable_cases else 0.0,
+        "mean_reciprocal_rank": reciprocal_rank_total / answerable_cases
+        if answerable_cases
+        else 0.0,
         "per_case": per_case,
     }
 

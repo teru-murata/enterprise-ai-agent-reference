@@ -15,11 +15,12 @@ The evaluation pipeline is planned around deterministic synthetic examples first
 
 ## Current Eval Set
 
-`datasets/golden_eval_set.jsonl` contains three synthetic examples:
+`datasets/golden_eval_set.jsonl` contains four synthetic examples:
 
 - A grounded incident response question.
 - An approval-required ticket/action flow.
 - An access-control-sensitive query.
+- An insufficient-evidence query.
 
 Each case includes:
 
@@ -57,3 +58,25 @@ Future answer evaluation should check:
 - citation quality and citation coverage.
 - policy compliance for sensitive or approval-required actions.
 - LLM-as-a-judge only after deterministic checks are in place.
+
+## M2.5 Deterministic Answer Evaluation
+
+M2.5 adds deterministic answer-quality evaluation for the current answer composer. It still avoids OpenAI APIs, embeddings, external services, and LLM-as-a-judge.
+
+The evaluation now has three layers:
+
+- Retrieval evaluation: verifies that expected source documents appear in keyword retrieval results.
+- Deterministic answer evaluation: verifies citations, expected term coverage, human review enforcement, insufficient-evidence handling, and a groundedness proxy.
+- Future LLM-as-a-judge evaluation: planned for later, after deterministic checks are stable.
+
+Answer evaluation is added before agent workflow and model calls because it creates a baseline quality gate for citations and anti-hallucination behavior. Once tool use and model-generated answers are introduced, regressions can be compared against this deterministic baseline.
+
+The current answer-quality metrics are:
+
+- citation coverage: answerable cases pass when citations include an expected source document.
+- expected term coverage: average fraction of expected answer terms present in answer drafts.
+- human review rate: fraction of drafts with `requires_human_review: true`.
+- insufficient evidence success rate: unanswerable cases pass when the draft indicates insufficient evidence, confidence is low, and no unrelated citations are included.
+- groundedness proxy: answerable cases pass when the answer has citations and overlaps with retrieved context terms.
+
+The groundedness proxy is not a full factuality metric. It only checks deterministic overlap with retrieved context.

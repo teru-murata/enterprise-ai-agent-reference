@@ -61,11 +61,13 @@ ruff check .
 
 After changes, run the focused commands for touched areas and then the full local validation when dependencies are installed.
 
-Run retrieval evals after any RAG, retrieval, chunking, document loading, or eval dataset change:
+Run evals after any RAG, retrieval, chunking, document loading, answer composition, or eval logic change:
 
 ```bash
 python scripts/run_evals.py
 ```
+
+Do not weaken eval thresholds without documenting why in the same change.
 
 ```powershell
 .\scripts\check.ps1

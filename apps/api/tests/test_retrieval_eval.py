@@ -10,9 +10,11 @@ from app.evals.retrieval_eval import (
 def test_load_eval_cases() -> None:
     cases = load_eval_cases()
 
-    assert len(cases) == 3
+    assert len(cases) == 4
     assert cases[0].case_id == "eval-001"
     assert cases[0].expected_documents == ["incident_response_policy.md"]
+    assert cases[0].expected_answer_terms
+    assert cases[-1].expects_insufficient_evidence is True
 
 
 def test_hit_at_k() -> None:
@@ -38,10 +40,12 @@ def test_reciprocal_rank() -> None:
 def test_run_retrieval_eval_on_synthetic_dataset() -> None:
     metrics = run_retrieval_eval()
 
-    assert metrics["total_cases"] == 3
+    assert metrics["total_cases"] == 4
+    assert metrics["answerable_cases"] == 3
+    assert metrics["insufficient_evidence_cases"] == 1
     assert metrics["hit_at_3"] == 1.0
     assert metrics["mean_reciprocal_rank"] > 0
-    assert len(metrics["per_case"]) == 3
+    assert len(metrics["per_case"]) == 4
 
 
 def test_threshold_pass_fail_behavior() -> None:
