@@ -43,4 +43,15 @@ The deterministic incident-support workflow keeps action safety explicit:
 - Guardrail-blocked messages do not trigger retrieval, normal answer drafting, or normal ticket drafting.
 - Audit events are emitted for guardrail checks, classification, retrieval, answer drafting, ticket drafting, and approval requests.
 
+## M5 MCP Safety Constraints
+
+The MCP policy/action server is local and stdio-only in this phase:
+
+- No real side effects are allowed.
+- Ticket creation is draft-only.
+- Approval remains mandatory.
+- Synthetic customer context is the only customer context returned.
+- Tools must not read or return secrets.
+- Streamable HTTP is deferred until authentication, authorization, and origin validation are designed.
+
 Future production work should add authentication, authorization, least-privilege service roles, structured audit events, retention controls, and security review before deployment.

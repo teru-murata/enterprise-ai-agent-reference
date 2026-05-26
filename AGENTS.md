@@ -34,6 +34,10 @@ Build a minimal but realistic enterprise AI agent reference stack for internal i
 - Agent workflows must not bypass guardrails.
 - Agent workflows must not perform real external actions.
 - Agent workflows must preserve mandatory human approval.
+- MCP tools must not execute real external side effects.
+- MCP tools must not bypass approval.
+- MCP tools must not return secrets.
+- Protocol and server changes must keep tests deterministic.
 
 ## Backend Commands
 

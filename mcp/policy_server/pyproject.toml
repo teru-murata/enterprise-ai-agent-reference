@@ -3,7 +3,9 @@ name = "enterprise-ai-agent-reference-policy-server"
 version = "0.1.0"
 description = "Synthetic policy helper functions for the enterprise AI agent reference stack."
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+    "mcp[cli]>=1.0.0",
+]
 
 [project.optional-dependencies]
 dev = [
@@ -18,4 +20,3 @@ pythonpath = ["."]
 [tool.ruff]
 line-length = 100
 target-version = "py311"
-

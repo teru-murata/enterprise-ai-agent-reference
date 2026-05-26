@@ -98,3 +98,13 @@ Future workflow evals should measure:
 - safe blocked behavior for guardrail-triggering inputs.
 - audit event completeness.
 - draft-only behavior for ticket and tool-like actions.
+
+## Future MCP Tool-Call Evaluation
+
+M5 adds an official MCP SDK server, but protocol-level and agent-to-MCP evals are planned later. Future MCP evaluation should cover:
+
+- correct tool selection.
+- approval enforcement for action-like tools.
+- safe blocked behavior when guardrails trigger.
+- no side-effect execution.
+- synthetic-only customer context.

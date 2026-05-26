@@ -199,3 +199,24 @@ curl -X POST "http://127.0.0.1:8000/agent/incident-support" \
 The workflow orchestrates guardrail analysis, deterministic incident classification, keyword RAG retrieval, grounded answer drafting, synthetic ticket draft creation, synthetic approval request creation, and audit-event emission.
 
 All actions are draft-only and require human approval. The workflow does not call models, execute real tools, create real tickets, contact external systems, or persist audit events.
+
+## M5 MCP Policy/Action Server
+
+The `mcp/policy_server` package now includes an official MCP Python SDK server using `FastMCP`. It runs locally over stdio and exposes deterministic synthetic tools:
+
+- `search_policy`: searches in-memory synthetic policy data.
+- `create_ticket_draft`: creates a synthetic draft ticket payload only.
+- `request_approval`: creates a synthetic pending approval request.
+- `get_customer_context`: returns synthetic customer context only.
+
+All action-like tools are approval-gated and return `requires_human_review: true`. No tool performs real external side effects, reads secrets, returns credentials, creates real tickets, or persists state.
+
+Run locally:
+
+```bash
+cd mcp/policy_server
+python -m pip install -e ".[dev]"
+python -m server
+```
+
+The incident-support agent still uses local deterministic functions in M4. A future M6 phase will add an MCP client bridge from the agent workflow to this stdio server. Streamable HTTP transport is intentionally deferred until authentication, authorization, and origin validation are designed.

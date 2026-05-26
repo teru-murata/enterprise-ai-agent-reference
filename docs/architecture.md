@@ -193,7 +193,28 @@ user message
 
 The current ticket and approval steps are local placeholders. Real MCP protocol integration, external tool execution, and persistent audit storage are planned later.
 
-The MCP policy server is currently a plain Python module. It simulates enterprise policy lookup, ticket draft creation, and approval request generation. Phase 2 will wrap these functions in an MCP-compatible server.
+## M5 MCP Policy/Action Server
+
+The policy/action server uses the official MCP Python SDK and exposes local stdio tools:
+
+```text
+Incident-support agent
+        |
+        v
+ future MCP client bridge
+        |
+        v
+ MCP stdio server
+        |
+        +--> search_policy
+        +--> create_ticket_draft
+        +--> request_approval
+        +--> get_customer_context
+```
+
+M5 implements the MCP server side only. The M4 agent still calls local deterministic helpers. M6 is expected to add a client bridge from the agent workflow to the MCP stdio server.
+
+The MCP policy server is now an official FastMCP stdio server for synthetic policy lookup, ticket draft creation, approval requests, and synthetic customer context. The incident-support agent will call it through an MCP client bridge in a later phase.
 
 The dataset is intentionally synthetic and small. It supports local demos, ingestion scaffolding, and evaluation examples without exposing customer or production data.
 
