@@ -15,5 +15,6 @@ This project is synthetic-only. It must not contain production documents, real c
 
 The current MCP policy server functions return local dictionaries only. They do not call external services, create tickets, change cloud infrastructure, or access real systems.
 
-Future production work should add authentication, authorization, least-privilege service roles, structured audit events, retention controls, and security review before deployment.
+The current answer composer creates deterministic drafts from retrieved synthetic context only. All answer drafts require human review, no tool execution is performed by answer composition, and an insufficient-evidence response is returned when no supporting context is retrieved.
 
+Future production work should add authentication, authorization, least-privilege service roles, structured audit events, retention controls, and security review before deployment.

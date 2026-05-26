@@ -25,6 +25,9 @@ Build a minimal but realistic enterprise AI agent reference stack for internal i
 - Prefer synthetic fixtures and deterministic tests.
 - Avoid network calls in tests and local scripts unless explicitly approved.
 - Treat tool execution as approval-gated when it could change external state.
+- Answer composition must not invent facts beyond retrieved context.
+- Generated answers that use retrieved context must include citations.
+- Human review remains required for answer drafts until a later phase explicitly changes this.
 
 ## Backend Commands
 

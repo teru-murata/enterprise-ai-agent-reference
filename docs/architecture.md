@@ -88,6 +88,31 @@ datasets/golden_eval_set.jsonl
 
 The eval fails if hit@3 falls below the current threshold of `1.0`.
 
+## M2 Grounded Answer Flow
+
+The answer composition path creates deterministic drafts from retrieved context:
+
+```text
+user question
+        |
+        v
+ keyword retriever
+        |
+        v
+ retrieved chunks
+        |
+        v
+ answer composer
+        |
+        v
+ citations + limitations + confidence
+        |
+        v
+ human review required
+```
+
+The composer does not call an LLM and does not infer facts beyond retrieved snippets. If no chunks are retrieved, it returns an insufficient-evidence response.
+
 The MCP policy server is currently a plain Python module. It simulates enterprise policy lookup, ticket draft creation, and approval request generation. Phase 2 will wrap these functions in an MCP-compatible server.
 
 The dataset is intentionally synthetic and small. It supports local demos, ingestion scaffolding, and evaluation examples without exposing customer or production data.

@@ -141,3 +141,17 @@ python scripts/run_evals.py
 ```
 
 This is retrieval evaluation only. It deliberately runs before LLM-based answer evaluation so retrieval quality can be validated without model calls, embeddings, external APIs, or non-deterministic judges.
+
+## M2 Grounded Answer Composition
+
+The backend includes a deterministic answer draft endpoint:
+
+```bash
+curl -X POST "http://127.0.0.1:8000/answers/draft" \
+  -H "Content-Type: application/json" \
+  -d "{\"question\":\"How should a Severity 2 incident be handled?\"}"
+```
+
+The endpoint retrieves synthetic markdown chunks with the keyword retriever, then composes a concise draft from those retrieved snippets. Model calls are disabled. The draft includes citations, limitations, confidence, retrieval mode, retrieved count, and `requires_human_review: true`.
+
+Every answer is explicitly a draft generated from retrieved context. It must not be treated as an autonomous final answer, and it requires human review before use in any operational workflow.

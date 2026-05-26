@@ -18,6 +18,8 @@ def main() -> None:
     print(f"- hit@3: {float(metrics['hit_at_3']):.3f}")
     print(f"- MRR: {float(metrics['mean_reciprocal_rank']):.3f}")
     print()
+    print("Answer-quality evaluation: planned, not active in M2.")
+    print()
     print("Per-case results:")
 
     for case in metrics["per_case"]:

@@ -45,3 +45,15 @@ The current quality gate requires hit@3 to be `1.0`. This is intentionally stric
 Retrieval quality is evaluated before answer generation quality because bad retrieval makes grounded answer evaluation misleading. If the expected source document is missing from context, answer correctness, groundedness, and citation quality failures may be retrieval failures rather than generation failures.
 
 Future phases can add answer correctness checks, model-graded groundedness, citation validation, policy compliance assertions, latency tracking, and cost reporting.
+
+## M2 Answer Composition Status
+
+M2 adds deterministic answer composition from retrieved chunks. This is not answer-quality evaluation yet. The current eval pipeline still gates retrieval quality only.
+
+Future answer evaluation should check:
+
+- answer correctness against expected policy behavior.
+- groundedness against retrieved snippets.
+- citation quality and citation coverage.
+- policy compliance for sensitive or approval-required actions.
+- LLM-as-a-judge only after deterministic checks are in place.
