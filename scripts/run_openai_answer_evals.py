@@ -34,10 +34,26 @@ def main() -> None:
     expected_term_coverage_total = 0.0
     answerable_cases = 0
     groundedness_passes = 0
+    latencies: list[int] = []
+    total_input_tokens = 0
+    total_output_tokens = 0
+    total_estimated_cost = 0.0
+    has_cost_estimate = False
 
     for case in cases:
         retrieved_chunks = retrieve_keyword_matches(case.query, chunks)
         draft = compose_answer(case.query, retrieved_chunks, provider="openai")
+        model_call = draft.get("model_call", {})
+        if isinstance(model_call, dict):
+            if isinstance(model_call.get("latency_ms"), int):
+                latencies.append(int(model_call["latency_ms"]))
+            usage = model_call.get("usage", {})
+            if isinstance(usage, dict):
+                total_input_tokens += int(usage.get("input_tokens") or 0)
+                total_output_tokens += int(usage.get("output_tokens") or 0)
+            if model_call.get("estimated_cost_usd") is not None:
+                has_cost_estimate = True
+                total_estimated_cost += float(model_call["estimated_cost_usd"])
         result = evaluate_answer_case(case, retrieved_chunks, draft)
         per_case.append(result)
 
@@ -76,6 +92,15 @@ def main() -> None:
     print(f"- insufficient evidence success rate: {insufficient_evidence_success_rate:.3f}")
     print(f"- expected term coverage: {expected_term_coverage:.3f}")
     print(f"- groundedness proxy: {groundedness_proxy:.3f}")
+    average_latency = sum(latencies) / len(latencies) if latencies else None
+    print(f"- average latency_ms: {average_latency:.1f}" if average_latency else "- average latency_ms: unavailable")
+    print(f"- total input tokens: {total_input_tokens if total_input_tokens else 'unavailable'}")
+    print(f"- total output tokens: {total_output_tokens if total_output_tokens else 'unavailable'}")
+    print(
+        f"- total estimated_cost_usd: {total_estimated_cost:.8f}"
+        if has_cost_estimate
+        else "- total estimated_cost_usd: cost not configured"
+    )
     print()
 
     for result in per_case:

@@ -108,4 +108,15 @@ OpenAI answer generation is guarded by the same safety controls:
 - All model-generated drafts require human review.
 - No real tool execution or autonomous action is added.
 
+## M8.6 Observability Logging Safety
+
+Model-call observability must stay metadata-only:
+
+- API keys are never logged.
+- Raw prompts are not logged.
+- Raw model outputs are not logged.
+- Raw embeddings are not logged.
+- Full user input is not stored in audit metadata.
+- Cost estimates are null unless explicit pricing config is provided.
+
 Future production work should add authentication, authorization, least-privilege service roles, structured audit events, retention controls, and security review before deployment.

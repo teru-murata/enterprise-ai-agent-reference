@@ -374,6 +374,28 @@ user question
 
 OpenAI answer generation is only available after guardrails pass and retrieval has produced context. The application owns citations and review requirements; the model does not perform tool execution or create final operational answers.
 
+## M8.6 Model-call Observability Flow
+
+Optional OpenAI provider calls now flow through safe observability helpers:
+
+```text
+OpenAI provider
+        |
+        v
+ model call observer
+        |
+        +--> latency_ms
+        +--> usage tokens
+        +--> model/provider/operation
+        +--> service tier
+        +--> cost estimate placeholder
+        |
+        v
+ safe audit metadata
+```
+
+The observer does not store raw prompts, raw outputs, raw embeddings, API keys, or full user input. Cost estimates are null unless explicit pricing config is supplied by environment.
+
 The dataset is intentionally synthetic and small. It supports local demos, ingestion scaffolding, and evaluation examples without exposing customer or production data.
 
 The AWS plan targets ECS Fargate, RDS PostgreSQL with pgvector, S3, ALB, Secrets Manager, CloudWatch, GitHub Actions, and Terraform. No AWS resources are created by the current repository.

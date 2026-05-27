@@ -27,6 +27,7 @@ def test_deterministic_answer_provider_is_default(monkeypatch) -> None:
     assert get_answer_provider() == "deterministic"
     assert draft["answer_provider"] == "deterministic"
     assert draft["requires_human_review"] is True
+    assert draft["model_call"]["status"] == "skipped"
 
 
 def test_openai_answer_provider_requires_explicit_selection(monkeypatch) -> None:

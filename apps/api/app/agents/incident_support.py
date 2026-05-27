@@ -171,6 +171,9 @@ def run_incident_support_workflow(request: dict[str, object]) -> dict[str, objec
             citation_count=len(answer_draft["citations"]),
             requires_human_review=bool(answer_draft["requires_human_review"]),
             answer_provider=answer_provider,
+            model_call=answer_draft.get("model_call")
+            if isinstance(answer_draft.get("model_call"), dict)
+            else None,
         )
     )
 

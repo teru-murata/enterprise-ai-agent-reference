@@ -200,6 +200,9 @@ def answer_draft(request: AnswerDraftRequest) -> dict[str, object]:
             citation_count=len(draft["citations"]),
             requires_human_review=bool(draft["requires_human_review"]),
             answer_provider=answer_provider,
+            model_call=draft.get("model_call")
+            if isinstance(draft.get("model_call"), dict)
+            else None,
         ),
     ]
 
@@ -212,6 +215,7 @@ def answer_draft(request: AnswerDraftRequest) -> dict[str, object]:
         "citations": draft["citations"],
         "limitations": draft["limitations"],
         "requires_human_review": draft["requires_human_review"],
+        "model_call": draft.get("model_call"),
         "retrieved_count": len(retrieved_chunks),
         "guardrail_result": guardrail_result,
         "audit_events": audit_events,

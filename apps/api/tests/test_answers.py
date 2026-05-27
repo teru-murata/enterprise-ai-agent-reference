@@ -71,6 +71,7 @@ def test_answer_draft_endpoint_success() -> None:
     assert body["citations"]
     assert body["requires_human_review"] is True
     assert body["guardrail_result"]["allowed"] is True
+    assert body["model_call"]["status"] == "skipped"
     assert body["audit_events"]
 
 
@@ -108,6 +109,21 @@ def test_answer_draft_endpoint_high_risk_question_returns_safety_response() -> N
     assert "Safety response" in body["answer"]
     assert "Draft generated from retrieved synthetic context" not in body["answer"]
     assert body["audit_events"]
+
+
+def test_answer_draft_audit_metadata_excludes_raw_prompt_and_api_key() -> None:
+    response = client.post(
+        "/answers/draft",
+        json={"question": "How should a Severity 2 incident be handled?"},
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    for event in body["audit_events"]:
+        metadata_text = str(event["metadata"]).lower()
+        assert "raw_prompt" not in metadata_text
+        assert "api_key" not in metadata_text
+        assert "sk-" not in metadata_text
 
 
 def test_answer_draft_endpoint_invalid_provider_returns_400() -> None:
