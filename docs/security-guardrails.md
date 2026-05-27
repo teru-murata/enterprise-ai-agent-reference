@@ -75,4 +75,10 @@ Workflow evals now check safety behavior directly:
 - Audit completeness checks that guardrail, classification, retrieval, answer draft, customer-context, ticket-draft, and approval-request events are emitted where expected.
 - Synthetic data safety checks returned tool/context payloads for synthetic-only classification and obvious secret markers.
 
+## M7 Local Database Boundary
+
+The local PostgreSQL + pgvector service stores synthetic sample documents and deterministic placeholder embeddings only. It is not connected to AWS, production systems, external model APIs, or real customer data.
+
+Local development defaults are intentionally obvious and non-production. Real `DATABASE_URL` values, `.env` files, passwords, database dumps, and Terraform state must not be committed.
+
 Future production work should add authentication, authorization, least-privilege service roles, structured audit events, retention controls, and security review before deployment.

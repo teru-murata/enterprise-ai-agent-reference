@@ -125,3 +125,17 @@ The evaluation layers are now:
 Workflow evals use `tool_mode="local"` by default. MCP stdio validation remains an explicit separate script so normal CI does not depend on subprocess lifecycle behavior.
 
 Workflow evaluation is added before model calls or real integrations because it locks down the safety contract first: blocked inputs must not trigger action tools, action outputs must remain draft-only or pending, approval must remain mandatory, and audit events must capture workflow steps with safe metadata.
+
+## M7 pgvector Evaluation Status
+
+Current deterministic evals still use keyword retrieval by default. This keeps CI independent of Docker, PostgreSQL, pgvector extensions, and local database state.
+
+The M7 pgvector path is validated explicitly with `scripts/check_pgvector.ps1` or `scripts/check_pgvector.sh`. Future phases can add gated pgvector retrieval evals that compare:
+
+- keyword vs pgvector retrieval hit rates on the synthetic golden set.
+- expected document coverage for vector search.
+- ingestion completeness.
+- latency for local vector search.
+- behavior when the vector database is unavailable.
+
+Any future pgvector eval must remain gated unless CI is intentionally updated to provide a stable database service.

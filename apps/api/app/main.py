@@ -12,6 +12,8 @@ from app.audit.events import (
 from app.guardrails.input_checks import analyze_user_input
 from app.rag.chunking import split_into_chunks
 from app.rag.documents import load_sample_documents
+from app.rag.modes import RETRIEVAL_MODE_LABELS, parse_retrieval_mode
+from app.rag.pgvector_store import search_pgvector_from_database_url
 from app.rag.retrieval import retrieve_keyword_matches
 
 PROJECT_METADATA = {
@@ -48,9 +50,14 @@ def version() -> dict[str, str]:
 
 
 @app.get("/rag/search")
-def rag_search(query: str) -> dict[str, object]:
+def rag_search(query: str, mode: str = "keyword") -> dict[str, object]:
     if not query.strip():
         raise HTTPException(status_code=400, detail="query must not be empty")
+
+    try:
+        retrieval_mode = parse_retrieval_mode(mode)
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
 
     guardrail_result = analyze_user_input(query)
     guardrail_event = create_guardrail_audit_event(
@@ -68,21 +75,35 @@ def rag_search(query: str) -> dict[str, object]:
             },
         )
 
-    documents = load_sample_documents()
-    chunks = split_into_chunks(documents)
-    results = retrieve_keyword_matches(query=query, chunks=chunks)
+    if retrieval_mode == "keyword":
+        documents = load_sample_documents()
+        chunks = split_into_chunks(documents)
+        results = retrieve_keyword_matches(query=query, chunks=chunks)
+    else:
+        try:
+            results = search_pgvector_from_database_url(query=query)
+        except Exception as error:
+            raise HTTPException(
+                status_code=503,
+                detail=(
+                    "pgvector retrieval is unavailable. Start the local PostgreSQL/pgvector "
+                    "service and ingest sample documents before using mode=pgvector."
+                ),
+            ) from error
+
+    retrieval_mode_label = RETRIEVAL_MODE_LABELS[retrieval_mode]
     audit_events = [
         guardrail_event,
         create_retrieval_audit_event(
             subject="rag_search",
             result_count=len(results),
-            retrieval_mode="keyword-placeholder",
+            retrieval_mode=retrieval_mode_label,
         ),
     ]
 
     return {
         "query": query,
-        "retrieval_mode": "keyword-placeholder",
+        "retrieval_mode": retrieval_mode_label,
         "count": len(results),
         "results": results,
         "guardrail_result": guardrail_result,
