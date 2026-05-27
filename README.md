@@ -363,3 +363,37 @@ python scripts/compare_retrieval_modes.py --include-openai
 ```
 
 M8 does not add text generation, Responses API usage, autonomous tool execution, or real customer data. OpenAI calls are explicit, API-key gated, and excluded from normal CI.
+
+## M8.5 OpenAI Responses Answer Provider
+
+The answer layer now supports an optional OpenAI Responses API provider for grounded answer drafts. Deterministic answer composition remains the default for normal CI, local development, app startup, and standard evals.
+
+Answer providers:
+
+- `deterministic`: default, local, no external API calls.
+- `openai`: explicit, uses OpenAI Responses API after guardrails and retrieval.
+
+Environment variables:
+
+- `ANSWER_PROVIDER=deterministic | openai`
+- `OPENAI_API_KEY`: required only for `ANSWER_PROVIDER=openai`
+- `OPENAI_TEXT_MODEL=gpt-5.2`
+- `OPENAI_REASONING_EFFORT=low`
+
+Explicit OpenAI answer smoke validation:
+
+```powershell
+.\scripts\check_openai_answer_generation.ps1
+```
+
+```bash
+./scripts/check_openai_answer_generation.sh
+```
+
+Explicit OpenAI answer eval:
+
+```bash
+OPENAI_API_KEY=... ANSWER_PROVIDER=openai python scripts/run_openai_answer_evals.py
+```
+
+Guardrails run before any OpenAI answer call. Guardrail-blocked inputs do not call OpenAI. Citations are derived from retrieved chunks by the application, and every generated draft keeps `requires_human_review: true`.

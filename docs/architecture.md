@@ -346,6 +346,34 @@ sample_docs
 
 The deterministic provider remains the default for normal CI, local evals, and app startup. The OpenAI provider is embeddings-only and is used only when explicitly selected by environment or script.
 
+## M8.5 Answer Provider Flow
+
+Answer drafting now has deterministic and explicit OpenAI provider paths:
+
+```text
+user question
+        |
+        v
+ guardrails
+        |
+        v
+ retriever
+        |
+        v
+ answer provider
+        +--> deterministic composer, default
+        |
+        +--> OpenAI Responses provider, explicit, API-key gated
+        |
+        v
+ citations from retrieved chunks
+        |
+        v
+ human review required
+```
+
+OpenAI answer generation is only available after guardrails pass and retrieval has produced context. The application owns citations and review requirements; the model does not perform tool execution or create final operational answers.
+
 The dataset is intentionally synthetic and small. It supports local demos, ingestion scaffolding, and evaluation examples without exposing customer or production data.
 
 The AWS plan targets ECS Fargate, RDS PostgreSQL with pgvector, S3, ALB, Secrets Manager, CloudWatch, GitHub Actions, and Terraform. No AWS resources are created by the current repository.

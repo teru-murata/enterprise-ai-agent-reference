@@ -148,3 +148,16 @@ def test_incident_support_endpoint_invalid_tool_mode_returns_400() -> None:
     assert response.status_code == 400
     assert "Unsupported tool_mode" in response.json()["detail"]
 
+
+def test_incident_support_endpoint_invalid_answer_provider_returns_400() -> None:
+    response = client.post(
+        "/agent/incident-support",
+        json={
+            "message": "Severity 2 incident degradation affecting support workflows.",
+            "answer_provider": "unknown",
+        },
+    )
+
+    assert response.status_code == 400
+    assert "Unsupported answer provider" in response.json()["detail"]
+

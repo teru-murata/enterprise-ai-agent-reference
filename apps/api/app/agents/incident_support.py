@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from uuid import uuid4
 
-from app.answers.composer import compose_grounded_answer
+from app.answers.providers import compose_answer, get_answer_provider
 from app.audit.events import (
     create_answer_draft_audit_event,
     create_audit_event,
@@ -73,6 +73,7 @@ def blocked_answer(message: str) -> dict[str, object]:
 def run_incident_support_workflow(request: dict[str, object]) -> dict[str, object]:
     message = str(request.get("message", ""))
     tool_mode = validate_tool_mode(str(request.get("tool_mode", "local")))
+    answer_provider = get_answer_provider(str(request.get("answer_provider", "deterministic")))
     severity_hint = request.get("severity_hint")
     severity_hint_value = str(severity_hint) if severity_hint is not None else None
     workflow_id = str(uuid4())
@@ -101,6 +102,7 @@ def run_incident_support_workflow(request: dict[str, object]) -> dict[str, objec
                 metadata={
                     "workflow_type": workflow_type,
                     "tool_mode": tool_mode,
+                    "answer_provider": answer_provider,
                     "risk_level": guardrail_result["risk_level"],
                     "flags": guardrail_result["flags"],
                     "requires_human_review": True,
@@ -161,13 +163,14 @@ def run_incident_support_workflow(request: dict[str, object]) -> dict[str, objec
         )
     )
 
-    answer_draft = compose_grounded_answer(message, retrieved_chunks)
+    answer_draft = compose_answer(message, retrieved_chunks, provider=answer_provider)
     audit_events.append(
         create_answer_draft_audit_event(
             subject=workflow_type,
             retrieved_count=len(retrieved_chunks),
             citation_count=len(answer_draft["citations"]),
             requires_human_review=bool(answer_draft["requires_human_review"]),
+            answer_provider=answer_provider,
         )
     )
 
