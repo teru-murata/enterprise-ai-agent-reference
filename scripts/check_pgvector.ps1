@@ -5,29 +5,28 @@ param(
 $ErrorActionPreference = "Stop"
 $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 
-if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
-    Write-Error "Docker is required for pgvector validation but was not found on PATH."
-}
-
-$PreviousErrorActionPreference = $ErrorActionPreference
-$ErrorActionPreference = "Continue"
-docker info *> $null
-$DockerInfoExitCode = $LASTEXITCODE
-$ErrorActionPreference = $PreviousErrorActionPreference
-if ($DockerInfoExitCode -ne 0) {
-    Write-Error "Docker CLI is installed, but the Docker daemon is unavailable. Start Docker Desktop and retry pgvector validation."
-}
-
 Push-Location $RepoRoot
 try {
-    docker compose version | Out-Host
-    docker compose up -d postgres
-
-    $env:DATABASE_URL = if ($env:DATABASE_URL) {
-        $env:DATABASE_URL
+    if ($env:DATABASE_URL) {
+        Write-Host "Using DATABASE_URL from environment."
     }
     else {
-        "postgresql://app:app@localhost:5432/enterprise_ai_agent"
+        if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
+            Write-Error "Docker is required for local pgvector validation when DATABASE_URL is not set."
+        }
+
+        $PreviousErrorActionPreference = $ErrorActionPreference
+        $ErrorActionPreference = "Continue"
+        docker info *> $null
+        $DockerInfoExitCode = $LASTEXITCODE
+        $ErrorActionPreference = $PreviousErrorActionPreference
+        if ($DockerInfoExitCode -ne 0) {
+            Write-Error "Docker CLI is installed, but the Docker daemon is unavailable. Start Docker Desktop or set DATABASE_URL and retry pgvector validation."
+        }
+
+        docker compose version | Out-Host
+        docker compose up -d postgres
+        $env:DATABASE_URL = "postgresql://app:app@localhost:5432/enterprise_ai_agent"
     }
 
     @'

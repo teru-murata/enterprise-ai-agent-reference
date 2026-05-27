@@ -302,3 +302,19 @@ Explicit pgvector validation:
 ```
 
 The local defaults are development-only (`app` / `app` / `enterprise_ai_agent`). Do not commit `.env` files or real `DATABASE_URL` values.
+
+## M7.5 pgvector CI and Gated Evals
+
+pgvector integration now has a separate GitHub Actions workflow: `.github/workflows/pgvector-integration.yml`. It uses a pgvector PostgreSQL service container, initializes the schema, ingests synthetic documents, runs gated pgvector tests, and executes pgvector retrieval evals.
+
+Normal CI remains Docker-free and keyword-based. The pgvector workflow is triggered manually or when pgvector-related paths change.
+
+`scripts/check_pgvector.ps1` and `scripts/check_pgvector.sh` now use `DATABASE_URL` directly when it is set. If `DATABASE_URL` is not set, they attempt local Docker Compose startup for development.
+
+Gated pgvector evals:
+
+```bash
+DATABASE_URL=postgresql://app:app@localhost:5432/enterprise_ai_agent python scripts/run_pgvector_evals.py
+```
+
+The pgvector eval currently checks answerable cases from `datasets/golden_eval_set.jsonl` and requires hit@3 of at least `0.75`. The threshold is lower than keyword retrieval because placeholder embeddings are intentionally crude.

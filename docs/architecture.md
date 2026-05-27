@@ -296,6 +296,31 @@ real embedding model -> pgvector -> answer composer / agent workflow
 
 The current pgvector integration is local development only. It does not run in normal CI, does not call external model APIs, and stores only synthetic sample documents.
 
+## M7.5 pgvector CI Validation Flow
+
+The pgvector integration workflow validates the database path separately from normal CI:
+
+```text
+GitHub Actions
+        |
+        v
+ pgvector service container
+        |
+        v
+ schema initialization
+        |
+        v
+ synthetic document ingestion
+        |
+        v
+ pgvector search
+        |
+        v
+ gated pgvector retrieval evals
+```
+
+This workflow is explicit and path-filtered. Normal CI remains keyword-only and does not require Docker or a live database.
+
 The dataset is intentionally synthetic and small. It supports local demos, ingestion scaffolding, and evaluation examples without exposing customer or production data.
 
 The AWS plan targets ECS Fargate, RDS PostgreSQL with pgvector, S3, ALB, Secrets Manager, CloudWatch, GitHub Actions, and Terraform. No AWS resources are created by the current repository.

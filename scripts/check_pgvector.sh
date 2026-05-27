@@ -4,21 +4,25 @@ set -euo pipefail
 PYTHON_BIN="${PYTHON:-python}"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-if ! command -v docker >/dev/null 2>&1; then
-  echo "Docker is required for pgvector validation but was not found on PATH." >&2
-  exit 1
-fi
-
-if ! docker info >/dev/null 2>&1; then
-  echo "Docker CLI is installed, but the Docker daemon is unavailable. Start Docker and retry pgvector validation." >&2
-  exit 1
-fi
-
 cd "${REPO_ROOT}"
-docker compose version
-docker compose up -d postgres
 
-export DATABASE_URL="${DATABASE_URL:-postgresql://app:app@localhost:5432/enterprise_ai_agent}"
+if [[ -n "${DATABASE_URL:-}" ]]; then
+  echo "Using DATABASE_URL from environment."
+else
+  if ! command -v docker >/dev/null 2>&1; then
+    echo "Docker is required for local pgvector validation when DATABASE_URL is not set." >&2
+    exit 1
+  fi
+
+  if ! docker info >/dev/null 2>&1; then
+    echo "Docker CLI is installed, but the Docker daemon is unavailable. Start Docker or set DATABASE_URL and retry pgvector validation." >&2
+    exit 1
+  fi
+
+  docker compose version
+  docker compose up -d postgres
+  export DATABASE_URL="postgresql://app:app@localhost:5432/enterprise_ai_agent"
+fi
 
 "${PYTHON_BIN}" - <<'PY'
 import time

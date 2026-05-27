@@ -139,3 +139,17 @@ The M7 pgvector path is validated explicitly with `scripts/check_pgvector.ps1` o
 - behavior when the vector database is unavailable.
 
 Any future pgvector eval must remain gated unless CI is intentionally updated to provide a stable database service.
+
+## M7.5 Gated pgvector Retrieval Evals
+
+`scripts/run_pgvector_evals.py` adds explicit pgvector retrieval evaluation. It requires `DATABASE_URL`, initializes the schema, ingests synthetic sample documents, and evaluates answerable cases from `datasets/golden_eval_set.jsonl`.
+
+Current pgvector metrics:
+
+- hit@1.
+- hit@3.
+- mean reciprocal rank.
+
+The current pgvector gate requires hit@3 of at least `0.75`. Keyword retrieval remains the default deterministic baseline at hit@3 `1.0`; pgvector evals are separate because they depend on PostgreSQL, the pgvector extension, and placeholder embeddings.
+
+The GitHub Actions pgvector integration workflow provides the stable service-container path for this gated evaluation. Local Docker is optional and not required for normal CI.

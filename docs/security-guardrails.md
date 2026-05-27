@@ -81,4 +81,6 @@ The local PostgreSQL + pgvector service stores synthetic sample documents and de
 
 Local development defaults are intentionally obvious and non-production. Real `DATABASE_URL` values, `.env` files, passwords, database dumps, and Terraform state must not be committed.
 
+The pgvector GitHub Actions workflow uses local test credentials only and a service container scoped to the workflow job. `DATABASE_URL` must be provided by the environment and must not be committed to source control.
+
 Future production work should add authentication, authorization, least-privilege service roles, structured audit events, retention controls, and security review before deployment.
