@@ -49,6 +49,9 @@ Build a minimal but realistic enterprise AI agent reference stack for internal i
 - Do not make normal CI depend on Docker, PostgreSQL, or pgvector.
 - pgvector integration tests must be gated behind an explicit environment variable or validation script.
 - Do not replace deterministic keyword evals without preserving existing thresholds.
+- Pgvector tests must use `RUN_PGVECTOR_TESTS=1`.
+- Do not commit `DATABASE_URL`, `.env` files, database dumps, or local database state.
+- Keep keyword evals as the default retrieval baseline.
 
 ## Backend Commands
 
@@ -86,6 +89,12 @@ Run evals after any RAG, retrieval, chunking, document loading, answer compositi
 
 ```bash
 python scripts/run_evals.py
+```
+
+Run pgvector evals only when `DATABASE_URL` is available:
+
+```bash
+python scripts/run_pgvector_evals.py
 ```
 
 Do not weaken eval thresholds without documenting why in the same change.

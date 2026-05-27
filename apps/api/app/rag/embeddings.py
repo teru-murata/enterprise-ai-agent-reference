@@ -19,8 +19,7 @@ def embed_text_deterministic(text: str, dimensions: int = 16) -> list[float]:
     for token in tokenize_for_embedding(text):
         digest = hashlib.sha256(token.encode("utf-8")).digest()
         index = int.from_bytes(digest[:4], "big") % dimensions
-        direction = 1.0 if digest[4] % 2 == 0 else -1.0
-        vector[index] += direction
+        vector[index] += 1.0
 
     norm = math.sqrt(sum(value * value for value in vector))
     if norm == 0:

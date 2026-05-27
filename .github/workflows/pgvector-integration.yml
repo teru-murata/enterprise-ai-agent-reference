@@ -1,0 +1,47 @@
+name: pgvector integration
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "apps/api/app/db/**"
+      - "apps/api/app/rag/**"
+      - "apps/api/app/evals/**"
+      - "apps/api/tests/**"
+      - "scripts/check_pgvector.*"
+      - "scripts/run_pgvector_evals.py"
+      - ".github/workflows/pgvector-integration.yml"
+      - "docker-compose.yml"
+
+jobs:
+  pgvector:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg18-trixie
+        env:
+          POSTGRES_USER: app
+          POSTGRES_PASSWORD: app
+          POSTGRES_DB: enterprise_ai_agent
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U app -d enterprise_ai_agent"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      DATABASE_URL: postgresql://app:app@localhost:5432/enterprise_ai_agent
+      RUN_PGVECTOR_TESTS: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install -e ".[dev]"
+        working-directory: apps/api
+      - run: python -m pytest tests/test_pgvector.py
+        working-directory: apps/api
+      - run: bash scripts/check_pgvector.sh
+      - run: python scripts/run_pgvector_evals.py
