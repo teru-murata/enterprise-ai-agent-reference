@@ -12,6 +12,10 @@ dist/
 *.tfstate.*
 terraform.tfvars
 terraform.tfvars.json
+*.auto.tfvars
+*.auto.tfvars.json
+terraform.tfvars.local
+*.tfvars.local
 backend.tf
 
 .env

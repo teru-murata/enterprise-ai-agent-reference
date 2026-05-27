@@ -47,3 +47,18 @@ variable "engine_version" {
   description = "PostgreSQL engine version."
   type        = string
 }
+
+variable "deletion_protection" {
+  description = "Whether RDS deletion protection is enabled. Prefer true outside disposable dev environments."
+  type        = bool
+}
+
+variable "skip_final_snapshot" {
+  description = "Whether to skip a final DB snapshot on deletion. Dev may use true; production should use false."
+  type        = bool
+}
+
+variable "backup_retention_period" {
+  description = "RDS automated backup retention in days. Use higher values outside dev."
+  type        = number
+}

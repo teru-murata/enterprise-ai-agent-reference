@@ -21,6 +21,17 @@ variable "api_image_uri" {
   type        = string
 }
 
+variable "allowed_http_cidrs" {
+  description = "CIDR ranges allowed to reach the ALB HTTP listener. Avoid 0.0.0.0/0 unless explicitly approved for dev."
+  type        = list(string)
+}
+
+variable "ecs_assign_public_ip" {
+  description = "Whether Fargate tasks receive public IPs. True is dev convenience; false is preferred for private subnet deployments."
+  type        = bool
+  default     = true
+}
+
 variable "ecr_repository_name" {
   description = "ECR repository name for the API image."
   type        = string
@@ -101,6 +112,24 @@ variable "postgres_engine_version" {
   description = "PostgreSQL engine version for RDS."
   type        = string
   default     = "16.4"
+}
+
+variable "rds_deletion_protection" {
+  description = "Enable RDS deletion protection. Dev default is cleanup-friendly; production should use true."
+  type        = bool
+  default     = false
+}
+
+variable "rds_skip_final_snapshot" {
+  description = "Skip final snapshot on deletion. Dev default is cleanup-friendly; production should use false."
+  type        = bool
+  default     = true
+}
+
+variable "rds_backup_retention_period" {
+  description = "RDS automated backup retention in days. Dev default is low cost; production should use a reviewed value."
+  type        = number
+  default     = 1
 }
 
 variable "log_retention_days" {

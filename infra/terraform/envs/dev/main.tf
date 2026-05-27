@@ -63,14 +63,16 @@ module "api_service" {
   aws_region                = var.aws_region
   vpc_id                    = module.network.vpc_id
   subnet_ids                = module.network.public_subnet_ids
+  allowed_http_cidrs        = var.allowed_http_cidrs
   image_uri                 = var.api_image_uri
+  ecr_repository_arn        = module.ecr.repository_arn
   desired_count             = var.api_desired_count
   embedding_provider        = var.embedding_provider
   answer_provider           = var.answer_provider
   database_url_secret_arn   = module.secrets.database_url_secret_arn
   openai_api_key_secret_arn = module.secrets.openai_api_key_secret_arn
   documents_bucket_arn      = module.documents.bucket_arn
-  assign_public_ip          = true
+  assign_public_ip          = var.ecs_assign_public_ip
 }
 
 module "database" {
@@ -85,7 +87,10 @@ module "database" {
   db_username           = var.db_username
   db_instance_class     = var.db_instance_class
   allocated_storage_gb  = var.db_allocated_storage_gb
-  engine_version        = var.postgres_engine_version
+  engine_version          = var.postgres_engine_version
+  deletion_protection     = var.rds_deletion_protection
+  skip_final_snapshot     = var.rds_skip_final_snapshot
+  backup_retention_period = var.rds_backup_retention_period
 }
 
 module "observability" {

@@ -81,6 +81,10 @@ Build a minimal but realistic enterprise AI agent reference stack for internal i
 - Never commit AWS credentials, `.env` files, Terraform state, or local Terraform variable files.
 - Do not create AWS resources during the AWS CLI preflight phase.
 - Do not run AWS CLI commands unless the user explicitly requests them in the current task.
+- Review ALB exposure CIDRs before any Terraform apply review.
+- Review ECS public IP settings before any Terraform apply review.
+- Review RDS deletion protection, final snapshot, and backup retention settings before any Terraform apply review.
+- Keep Terraform plans at `0 to destroy` unless destruction is explicitly requested and reviewed.
 
 ## Backend Commands
 

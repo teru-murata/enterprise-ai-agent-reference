@@ -63,8 +63,9 @@ resource "aws_db_instance" "this" {
   parameter_group_name        = aws_db_parameter_group.this.name
   publicly_accessible         = false
   storage_encrypted           = true
-  skip_final_snapshot         = true
-  deletion_protection         = false
+  skip_final_snapshot         = var.skip_final_snapshot
+  deletion_protection         = var.deletion_protection
+  backup_retention_period     = var.backup_retention_period
 
   tags = {
     Name        = "${local.name_prefix}-postgres"

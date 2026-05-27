@@ -2,7 +2,7 @@
 
 This repository includes AWS CLI preflight and read-only inventory scripts for future Codex-assisted AWS operations. These scripts are safety gates only. They do not create, update, or delete AWS resources.
 
-M9 also adds an AWS deployment skeleton under `infra/terraform` and a manual GitHub Actions workflow. Terraform apply remains forbidden unless explicitly requested in the current task.
+M9 also adds an AWS deployment skeleton under `infra/terraform` and a manual GitHub Actions workflow. Terraform plan is allowed after preflight and validation when explicitly requested. Terraform apply remains forbidden unless explicitly requested in the current task.
 
 ## Purpose
 

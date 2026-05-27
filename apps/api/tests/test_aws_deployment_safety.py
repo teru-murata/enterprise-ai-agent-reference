@@ -46,6 +46,10 @@ def test_local_aws_config_example_exists_and_real_config_is_ignored() -> None:
     assert '"expectedAccountId": "123456789012"' in example.read_text(encoding="utf-8")
     assert ".local/*.json" in gitignore
     assert "!.local/*.example.json" in gitignore
+    assert "terraform.tfvars.local" in gitignore
+    assert "*.tfvars.local" in gitignore
+    assert "*.auto.tfvars" in gitignore
+    assert "*.auto.tfvars.json" in gitignore
 
 
 def test_terraform_examples_do_not_contain_obvious_secrets_or_real_arns() -> None:
@@ -68,6 +72,44 @@ def test_terraform_examples_do_not_contain_obvious_secrets_or_real_arns() -> Non
 
     for value in forbidden:
         assert value not in text
+
+
+def test_apply_readiness_controls_are_documented_and_configurable() -> None:
+    ecs_variables = (REPO_ROOT / "infra/terraform/modules/ecs_service/variables.tf").read_text(
+        encoding="utf-8"
+    )
+    ecs_main = (REPO_ROOT / "infra/terraform/modules/ecs_service/main.tf").read_text(
+        encoding="utf-8"
+    )
+    rds_variables = (REPO_ROOT / "infra/terraform/modules/rds_pgvector/variables.tf").read_text(
+        encoding="utf-8"
+    )
+    tfvars_example = (
+        REPO_ROOT / "infra/terraform/envs/dev/terraform.tfvars.example"
+    ).read_text(encoding="utf-8")
+    docs = (REPO_ROOT / "docs/aws-deployment.md").read_text(encoding="utf-8").lower()
+
+    assert "allowed_http_cidrs" in ecs_variables
+    assert "cidr_blocks = var.allowed_http_cidrs" in ecs_main
+    assert "ecs_assign_public_ip" in tfvars_example
+    assert "203.0.113.10/32" in tfvars_example
+    assert "deletion_protection" in rds_variables
+    assert "skip_final_snapshot" in rds_variables
+    assert "backup_retention_period" in rds_variables
+    assert "alb exposure cidr" in docs
+    assert "ecs public ip" in docs
+    assert "0 to destroy" in docs
+
+
+def test_iam_policy_avoids_broad_admin_and_scopes_runtime_permissions() -> None:
+    ecs_main = (REPO_ROOT / "infra/terraform/modules/ecs_service/main.tf").read_text(
+        encoding="utf-8"
+    )
+
+    assert "AdministratorAccess" not in ecs_main
+    assert "var.ecr_repository_arn" in ecs_main
+    assert "aws_cloudwatch_log_group.api.arn" in ecs_main
+    assert "ecr:GetAuthorizationToken" in ecs_main
 
 
 def test_no_terraform_state_files_are_tracked_or_present() -> None:

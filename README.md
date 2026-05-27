@@ -448,6 +448,18 @@ Required GitHub repository or environment variables:
 
 No AWS resources are created by default. Normal CI remains AWS-free, API-key-free, and deterministic. The local `.local/aws-dev.json` file is intentionally ignored by git; use `.local/aws-dev.example.json` as a safe template only.
 
+## M9.1 Terraform Apply-readiness Hardening
+
+The Terraform skeleton now includes additional apply-review guardrails:
+
+- ALB ingress is controlled by `allowed_http_cidrs`.
+- ECS task public IP assignment is controlled by `ecs_assign_public_ip`.
+- ECS execution permissions scope ECR image pull and CloudWatch log writes where practical.
+- RDS deletion protection, final snapshot behavior, and backup retention are explicit variables.
+- `terraform.tfvars.local`, auto tfvars, and local tfvars files are ignored.
+
+`terraform apply` remains forbidden unless explicitly requested and reviewed. See `docs/aws-deployment.md` for the before-apply checklist.
+
 ## AWS CLI Preflight Safety Gate
 
 Before any Codex-driven AWS operation, run the AWS CLI preflight with an explicit profile, region, and expected account ID:

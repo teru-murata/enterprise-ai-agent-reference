@@ -71,6 +71,22 @@ Copy `backend.tf.example` only after choosing a real remote state bucket and loc
 
 The Terraform skeleton includes an ECR module, but the manual deployment workflow expects `ECR_REPOSITORY` to reference an available repository at runtime. Create or import real infrastructure only after preflight, plan review, and explicit approval.
 
+## Before Terraform Apply
+
+Do not run `terraform apply` until all of the following are reviewed and explicitly approved:
+
+- Confirm the AWS account ID matches the intended account.
+- Confirm the AWS region is correct.
+- Confirm expected monthly cost for ALB, ECS, RDS, S3, CloudWatch, and ECR.
+- Confirm the ALB exposure CIDR in `allowed_http_cidrs`; avoid `0.0.0.0/0` unless explicitly approved for a disposable dev test.
+- Confirm the ECS public IP setting. `ecs_assign_public_ip = true` is dev convenience; production should prefer private subnets with an egress design.
+- Confirm RDS deletion protection, final snapshot, and backup retention settings.
+- Confirm no NAT Gateway is planned unless explicitly intended and cost-reviewed.
+- Confirm Secrets Manager values are created manually and not stored in Terraform state.
+- Confirm the cleanup plan, including S3 object retention, RDS snapshot behavior, log retention, and secret recovery windows.
+- Confirm the plan shows `0 to destroy`.
+- Confirm apply is explicitly approved in the current task.
+
 ## pgvector Setup
 
 After RDS PostgreSQL is provisioned, enable pgvector through a controlled migration path:
@@ -93,6 +109,7 @@ ECS, ALB, NAT gateways, RDS, S3, CloudWatch, and ECR can incur cost. The skeleto
 - Secrets containers are scaffolded, but secret values must be created out of band.
 - IAM permissions require final least-privilege review before use.
 - Database migrations and backup policies are placeholders.
+- Dev RDS defaults are cleanup-friendly. Production should enable deletion protection, keep final snapshots, and increase backup retention.
 
 ## Rollback and Cleanup
 
