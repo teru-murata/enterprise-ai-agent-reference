@@ -220,3 +220,33 @@ python -m server
 ```
 
 The incident-support agent still uses local deterministic functions in M4. A future M6 phase will add an MCP client bridge from the agent workflow to this stdio server. Streamable HTTP transport is intentionally deferred until authentication, authorization, and origin validation are designed.
+
+## M6 MCP Client Bridge
+
+The API includes an MCP client bridge for agent tool calls with two modes:
+
+- `local`: default deterministic mode used by normal tests, CI, and the incident-support workflow.
+- `mcp-stdio`: explicit mode that launches the local MCP policy/action server over stdio and calls its tools with the official MCP SDK.
+
+`POST /agent/incident-support` accepts an optional `tool_mode` field:
+
+```json
+{
+  "message": "Severity 2 incident degradation affecting support workflows.",
+  "customer_id": "synthetic-customer-001",
+  "severity_hint": "medium",
+  "tool_mode": "local"
+}
+```
+
+Normal CI uses `local` mode so tests remain deterministic and do not depend on subprocess lifecycle behavior. Explicit stdio validation can be run locally:
+
+```powershell
+.\scripts\check_mcp_stdio.ps1
+```
+
+```bash
+./scripts/check_mcp_stdio.sh
+```
+
+Both modes keep tool actions synthetic, draft-only, and approval-gated. No real external side effects occur.

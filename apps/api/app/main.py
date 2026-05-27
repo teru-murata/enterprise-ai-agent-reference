@@ -34,6 +34,7 @@ class IncidentSupportRequest(BaseModel):
     message: str
     customer_id: str = "synthetic-customer-001"
     severity_hint: str | None = None
+    tool_mode: str = "local"
 
 
 @app.get("/health")
@@ -94,7 +95,12 @@ def incident_support(request: IncidentSupportRequest) -> dict[str, object]:
     if not request.message.strip():
         raise HTTPException(status_code=400, detail="message must not be empty")
 
-    return run_incident_support_workflow(request.model_dump())
+    try:
+        return run_incident_support_workflow(request.model_dump())
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
+    except RuntimeError as error:
+        raise HTTPException(status_code=502, detail=str(error)) from error
 
 
 @app.post("/answers/draft")

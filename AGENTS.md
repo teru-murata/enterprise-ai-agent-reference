@@ -8,7 +8,7 @@ Build a minimal but realistic enterprise AI agent reference stack for internal i
 
 - `apps/api/`: FastAPI backend for health, metadata, and future agent APIs.
 - `apps/web/`: React + TypeScript frontend skeleton.
-- `mcp/policy_server/`: Plain Python policy lookup and workflow helper functions. MCP protocol support is a later phase.
+- `mcp/policy_server/`: FastMCP stdio policy/action server with synthetic, approval-gated tools.
 - `datasets/`: Synthetic markdown documents and golden eval cases.
 - `scripts/`: Placeholder ingestion and eval runners.
 - `docs/`: Architecture, scenario, eval, security, and AWS planning notes.
@@ -38,6 +38,9 @@ Build a minimal but realistic enterprise AI agent reference stack for internal i
 - MCP tools must not bypass approval.
 - MCP tools must not return secrets.
 - Protocol and server changes must keep tests deterministic.
+- Do not make normal CI depend on flaky MCP subprocess tests.
+- MCP bridge changes must preserve local deterministic mode.
+- Any MCP tool action must remain draft-only and approval-gated.
 
 ## Backend Commands
 
