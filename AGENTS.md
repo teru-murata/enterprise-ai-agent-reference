@@ -52,6 +52,12 @@ Build a minimal but realistic enterprise AI agent reference stack for internal i
 - Pgvector tests must use `RUN_PGVECTOR_TESTS=1`.
 - Do not commit `DATABASE_URL`, `.env` files, database dumps, or local database state.
 - Keep keyword evals as the default retrieval baseline.
+- Do not call OpenAI APIs in normal tests, normal CI, app startup, or default evals.
+- Do not require `OPENAI_API_KEY` for app startup.
+- Do not print API keys or raw embeddings.
+- Do not send real customer data, production documents, or secrets to OpenAI.
+- OpenAI embedding tests must be gated with `RUN_OPENAI_EMBEDDING_TESTS=1` or explicit scripts.
+- The deterministic embedding provider remains the default.
 
 ## Backend Commands
 
@@ -95,6 +101,12 @@ Run pgvector evals only when `DATABASE_URL` is available:
 
 ```bash
 python scripts/run_pgvector_evals.py
+```
+
+Run OpenAI embedding validation only when explicitly requested and `OPENAI_API_KEY` is available:
+
+```bash
+python scripts/run_openai_pgvector_evals.py
 ```
 
 Do not weaken eval thresholds without documenting why in the same change.

@@ -153,3 +153,15 @@ Current pgvector metrics:
 The current pgvector gate requires hit@3 of at least `0.75`. Keyword retrieval remains the default deterministic baseline at hit@3 `1.0`; pgvector evals are separate because they depend on PostgreSQL, the pgvector extension, and placeholder embeddings.
 
 The GitHub Actions pgvector integration workflow provides the stable service-container path for this gated evaluation. Local Docker is optional and not required for normal CI.
+
+## M8 OpenAI Embedding Retrieval Evals
+
+M8 adds optional OpenAI embedding retrieval evaluation through `scripts/run_openai_pgvector_evals.py`. The script requires both `DATABASE_URL` and `OPENAI_API_KEY`, initializes the local pgvector schema, ingests synthetic documents using OpenAI embeddings, and reports hit@1, hit@3, and MRR for answerable cases.
+
+Normal evals remain deterministic:
+
+- `scripts/run_evals.py` uses keyword retrieval and remains the baseline quality gate.
+- `scripts/run_pgvector_evals.py` uses deterministic placeholder embeddings and requires `DATABASE_URL`.
+- `scripts/run_openai_pgvector_evals.py` uses OpenAI embeddings and requires explicit API-key configuration.
+
+`scripts/compare_retrieval_modes.py` provides reporting across keyword, deterministic pgvector, and optionally OpenAI pgvector modes. It is not a quality gate and marks unavailable optional modes as skipped.

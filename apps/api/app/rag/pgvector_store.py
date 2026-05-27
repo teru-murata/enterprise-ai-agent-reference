@@ -9,7 +9,7 @@ from psycopg import Connection
 from app.db.connection import connect
 from app.rag.chunking import split_into_chunks
 from app.rag.documents import find_repository_root, load_sample_documents
-from app.rag.embeddings import embed_text_deterministic
+from app.rag.embeddings import embed_text
 
 EMBEDDING_DIMENSIONS = 16
 
@@ -58,11 +58,25 @@ def upsert_document(cursor: SupportsExecute, document: object) -> None:
     )
 
 
-def upsert_chunk(cursor: SupportsExecute, chunk: object) -> None:
-    embedding = embed_text_deterministic(
+def validate_embedding_dimensions(embedding: list[float]) -> None:
+    if len(embedding) != EMBEDDING_DIMENSIONS:
+        raise ValueError(
+            f"Embedding dimension mismatch. pgvector schema expects {EMBEDDING_DIMENSIONS}, "
+            f"received {len(embedding)}."
+        )
+
+
+def upsert_chunk(
+    cursor: SupportsExecute,
+    chunk: object,
+    embedding_provider: str | None = None,
+) -> None:
+    embedding = embed_text(
         f"{getattr(chunk, 'title')}\n{getattr(chunk, 'text')}",
+        provider=embedding_provider,
         dimensions=EMBEDDING_DIMENSIONS,
     )
+    validate_embedding_dimensions(embedding)
     cursor.execute(
         """
         INSERT INTO document_chunks (chunk_id, document_id, source_path, title, text, embedding)
@@ -85,7 +99,10 @@ def upsert_chunk(cursor: SupportsExecute, chunk: object) -> None:
     )
 
 
-def ingest_documents_to_pgvector(connection: Connection) -> dict[str, int]:
+def ingest_documents_to_pgvector(
+    connection: Connection,
+    embedding_provider: str | None = None,
+) -> dict[str, int]:
     documents = load_sample_documents()
     chunks = split_into_chunks(documents)
 
@@ -93,24 +110,30 @@ def ingest_documents_to_pgvector(connection: Connection) -> dict[str, int]:
         for document in documents:
             upsert_document(cursor, document)
         for chunk in chunks:
-            upsert_chunk(cursor, chunk)
+            upsert_chunk(cursor, chunk, embedding_provider=embedding_provider)
     connection.commit()
 
     return {"documents": len(documents), "chunks": len(chunks)}
 
 
-def ingest_documents_to_pgvector_from_database_url(database_url: str | None = None) -> dict[str, int]:
+def ingest_documents_to_pgvector_from_database_url(
+    database_url: str | None = None,
+    embedding_provider: str | None = None,
+) -> dict[str, int]:
     with connect(database_url) as connection:
         initialize_schema(connection)
-        return ingest_documents_to_pgvector(connection)
+        return ingest_documents_to_pgvector(connection, embedding_provider=embedding_provider)
 
 
 def search_pgvector(
     connection: Connection,
     query: str,
     limit: int = 5,
+    embedding_provider: str | None = None,
 ) -> list[dict[str, object]]:
-    query_embedding = vector_literal(embed_text_deterministic(query, dimensions=EMBEDDING_DIMENSIONS))
+    embedding = embed_text(query, provider=embedding_provider, dimensions=EMBEDDING_DIMENSIONS)
+    validate_embedding_dimensions(embedding)
+    query_embedding = vector_literal(embedding)
     rows = connection.execute(
         """
         SELECT
@@ -146,9 +169,15 @@ def search_pgvector_from_database_url(
     query: str,
     limit: int = 5,
     database_url: str | None = None,
+    embedding_provider: str | None = None,
 ) -> list[dict[str, object]]:
     with connect(database_url) as connection:
-        return search_pgvector(connection=connection, query=query, limit=limit)
+        return search_pgvector(
+            connection=connection,
+            query=query,
+            limit=limit,
+            embedding_provider=embedding_provider,
+        )
 
 
 def chunk_to_result(chunk: object, score: float) -> dict[str, object]:
