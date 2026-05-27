@@ -1,0 +1,22 @@
+name: OpenAI embedding smoke
+
+on:
+  workflow_dispatch:
+
+jobs:
+  openai-embedding-smoke:
+    runs-on: ubuntu-latest
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      EMBEDDING_PROVIDER: openai
+      OPENAI_EMBEDDING_MODEL: text-embedding-3-small
+      OPENAI_EMBEDDING_DIMENSIONS: "16"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install -e ".[dev]"
+        working-directory: apps/api
+      - run: bash scripts/check_openai_embeddings.sh

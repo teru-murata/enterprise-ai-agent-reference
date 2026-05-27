@@ -321,6 +321,31 @@ GitHub Actions
 
 This workflow is explicit and path-filtered. Normal CI remains keyword-only and does not require Docker or a live database.
 
+## M8 Embedding Provider Flow
+
+The embedding layer now has two provider paths:
+
+```text
+sample_docs
+        |
+        v
+ chunker
+        |
+        v
+ embedding provider
+        +--> deterministic provider, default, local only
+        |
+        +--> OpenAI provider, explicit, API-key gated
+        |
+        v
+ PostgreSQL + pgvector
+        |
+        v
+ pgvector retriever
+```
+
+The deterministic provider remains the default for normal CI, local evals, and app startup. The OpenAI provider is embeddings-only and is used only when explicitly selected by environment or script.
+
 The dataset is intentionally synthetic and small. It supports local demos, ingestion scaffolding, and evaluation examples without exposing customer or production data.
 
 The AWS plan targets ECS Fargate, RDS PostgreSQL with pgvector, S3, ALB, Secrets Manager, CloudWatch, GitHub Actions, and Terraform. No AWS resources are created by the current repository.

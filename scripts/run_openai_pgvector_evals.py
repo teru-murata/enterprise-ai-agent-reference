@@ -14,6 +14,7 @@ from app.evals.retrieval_eval import (  # noqa: E402
     reciprocal_rank,
     result_document_name,
 )
+from app.rag.embeddings import DEFAULT_OPENAI_EMBEDDING_MODEL  # noqa: E402
 from app.rag.pgvector_store import (  # noqa: E402
     initialize_schema,
     ingest_documents_to_pgvector,
@@ -26,11 +27,17 @@ HIT_AT_3_THRESHOLD = 0.75
 
 def main() -> None:
     if not os.getenv("DATABASE_URL"):
-        raise SystemExit("DATABASE_URL is required for pgvector retrieval evals")
+        raise SystemExit("DATABASE_URL is required for OpenAI pgvector retrieval evals")
+    if not os.getenv("OPENAI_API_KEY"):
+        raise SystemExit("OPENAI_API_KEY is required for OpenAI pgvector retrieval evals")
+
+    os.environ["EMBEDDING_PROVIDER"] = "openai"
+    os.environ.setdefault("OPENAI_EMBEDDING_MODEL", DEFAULT_OPENAI_EMBEDDING_MODEL)
+    os.environ.setdefault("OPENAI_EMBEDDING_DIMENSIONS", "16")
 
     with connect() as connection:
         initialize_schema(connection)
-        counts = ingest_documents_to_pgvector(connection, embedding_provider="deterministic")
+        counts = ingest_documents_to_pgvector(connection, embedding_provider="openai")
 
         cases = [case for case in load_eval_cases() if case.expected_documents]
         per_case: list[dict[str, object]] = []
@@ -39,12 +46,7 @@ def main() -> None:
         reciprocal_rank_total = 0.0
 
         for case in cases:
-            results = search_pgvector(
-                connection,
-                case.query,
-                limit=3,
-                embedding_provider="deterministic",
-            )
+            results = search_pgvector(connection, case.query, limit=3, embedding_provider="openai")
             retrieved_documents = [result_document_name(result) for result in results]
             case_hit_at_1 = hit_at_k(case.expected_documents, retrieved_documents, 1)
             case_hit_at_3 = hit_at_k(case.expected_documents, retrieved_documents, 3)
@@ -71,7 +73,10 @@ def main() -> None:
     hit_at_3 = hit_at_3_count / total_cases if total_cases else 0.0
     mean_reciprocal_rank = reciprocal_rank_total / total_cases if total_cases else 0.0
 
-    print("pgvector retrieval evaluation")
+    print("OpenAI pgvector retrieval evaluation")
+    print(f"- provider: openai")
+    print(f"- model: {os.getenv('OPENAI_EMBEDDING_MODEL')}")
+    print(f"- dimensions: {os.getenv('OPENAI_EMBEDDING_DIMENSIONS')}")
     print(f"- ingested documents: {counts['documents']}")
     print(f"- ingested chunks: {counts['chunks']}")
     print(f"- answerable cases: {total_cases}")
@@ -92,7 +97,8 @@ def main() -> None:
 
     if hit_at_3 < HIT_AT_3_THRESHOLD:
         raise SystemExit(
-            f"pgvector eval failed: hit@3 {hit_at_3:.3f} below {HIT_AT_3_THRESHOLD:.3f}"
+            f"OpenAI pgvector eval failed: hit@3 {hit_at_3:.3f} below "
+            f"{HIT_AT_3_THRESHOLD:.3f}"
         )
 
 

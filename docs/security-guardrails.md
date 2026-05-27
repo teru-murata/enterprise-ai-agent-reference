@@ -83,4 +83,16 @@ Local development defaults are intentionally obvious and non-production. Real `D
 
 The pgvector GitHub Actions workflow uses local test credentials only and a service container scoped to the workflow job. `DATABASE_URL` must be provided by the environment and must not be committed to source control.
 
+## M8 OpenAI API Key Boundary
+
+The OpenAI embedding provider is explicit and API-key gated:
+
+- No API keys are stored in the repository.
+- `OPENAI_API_KEY` is read from the environment only.
+- API keys are not logged or included in errors.
+- Raw embeddings are not printed by validation scripts.
+- Only synthetic sample text is sent to the embedding API.
+- No real customer data, production documents, or secrets may be sent to OpenAI.
+- No text generation or autonomous action execution is added in this phase.
+
 Future production work should add authentication, authorization, least-privilege service roles, structured audit events, retention controls, and security review before deployment.

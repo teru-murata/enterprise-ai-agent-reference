@@ -44,8 +44,13 @@ for _ in range(30):
     try:
         with connect() as connection:
             initialize_schema(connection)
-            counts = ingest_documents_to_pgvector(connection)
-            results = search_pgvector(connection, "incident escalation approval", limit=3)
+            counts = ingest_documents_to_pgvector(connection, embedding_provider="deterministic")
+            results = search_pgvector(
+                connection,
+                "incident escalation approval",
+                limit=3,
+                embedding_provider="deterministic",
+            )
         if not results:
             raise SystemExit("pgvector search returned no results")
         print(f"Ingested documents: {counts['documents']}")

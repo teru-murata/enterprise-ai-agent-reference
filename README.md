@@ -318,3 +318,48 @@ DATABASE_URL=postgresql://app:app@localhost:5432/enterprise_ai_agent python scri
 ```
 
 The pgvector eval currently checks answerable cases from `datasets/golden_eval_set.jsonl` and requires hit@3 of at least `0.75`. The threshold is lower than keyword retrieval because placeholder embeddings are intentionally crude.
+
+## M8 OpenAI SDK Embedding Provider
+
+The backend now has an optional OpenAI SDK embedding provider for pgvector ingestion and retrieval. Deterministic embeddings remain the default for local development, normal CI, app startup, and standard evals.
+
+Embedding providers:
+
+- `deterministic`: default, local, no external API calls.
+- `openai`: explicit, uses the official OpenAI Python SDK for embeddings only.
+
+Environment variables:
+
+- `EMBEDDING_PROVIDER=deterministic | openai`
+- `OPENAI_API_KEY`: required only for `EMBEDDING_PROVIDER=openai`
+- `OPENAI_EMBEDDING_MODEL=text-embedding-3-small`
+- `OPENAI_EMBEDDING_DIMENSIONS=16` for this demo schema
+- `DATABASE_URL`: required for pgvector evals
+
+Explicit OpenAI embedding smoke validation:
+
+```powershell
+.\scripts\check_openai_embeddings.ps1
+```
+
+```bash
+./scripts/check_openai_embeddings.sh
+```
+
+Explicit OpenAI pgvector eval:
+
+```bash
+DATABASE_URL=postgresql://app:app@localhost:5432/enterprise_ai_agent \
+EMBEDDING_PROVIDER=openai \
+OPENAI_API_KEY=... \
+python scripts/run_openai_pgvector_evals.py
+```
+
+Retrieval comparison report:
+
+```bash
+python scripts/compare_retrieval_modes.py
+python scripts/compare_retrieval_modes.py --include-openai
+```
+
+M8 does not add text generation, Responses API usage, autonomous tool execution, or real customer data. OpenAI calls are explicit, API-key gated, and excluded from normal CI.
