@@ -70,7 +70,7 @@ resource "aws_db_instance" "this" {
   tags = {
     Name        = "${local.name_prefix}-postgres"
     Environment = var.environment
-    DataClass    = "synthetic"
+    DataClass   = "synthetic"
   }
 }
 

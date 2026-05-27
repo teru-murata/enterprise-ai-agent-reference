@@ -78,15 +78,15 @@ module "api_service" {
 module "database" {
   source = "../../modules/rds_pgvector"
 
-  app_name              = var.app_name
-  environment           = var.environment
-  vpc_id                = module.network.vpc_id
-  private_subnet_ids    = module.network.private_subnet_ids
-  app_security_group_id = module.api_service.service_security_group_id
-  db_name               = var.db_name
-  db_username           = var.db_username
-  db_instance_class     = var.db_instance_class
-  allocated_storage_gb  = var.db_allocated_storage_gb
+  app_name                = var.app_name
+  environment             = var.environment
+  vpc_id                  = module.network.vpc_id
+  private_subnet_ids      = module.network.private_subnet_ids
+  app_security_group_id   = module.api_service.service_security_group_id
+  db_name                 = var.db_name
+  db_username             = var.db_username
+  db_instance_class       = var.db_instance_class
+  allocated_storage_gb    = var.db_allocated_storage_gb
   engine_version          = var.postgres_engine_version
   deletion_protection     = var.rds_deletion_protection
   skip_final_snapshot     = var.rds_skip_final_snapshot
@@ -96,8 +96,8 @@ module "database" {
 module "observability" {
   source = "../../modules/observability"
 
-  app_name             = var.app_name
-  environment          = var.environment
-  log_retention_days   = var.log_retention_days
-  create_dashboard     = false
+  app_name           = var.app_name
+  environment        = var.environment
+  log_retention_days = var.log_retention_days
+  create_dashboard   = false
 }
