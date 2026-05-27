@@ -46,6 +46,15 @@ module "documents" {
   enable_versioning = true
 }
 
+module "ecr" {
+  source = "../../modules/ecr"
+
+  app_name        = var.app_name
+  environment     = var.environment
+  repository_name = var.ecr_repository_name
+  scan_on_push    = true
+}
+
 module "api_service" {
   source = "../../modules/ecs_service"
 

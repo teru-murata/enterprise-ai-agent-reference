@@ -13,6 +13,11 @@ output "ecs_service_name" {
   value       = module.api_service.service_name
 }
 
+output "ecr_repository_url" {
+  description = "ECR repository URL for the API image."
+  value       = module.ecr.repository_url
+}
+
 output "documents_bucket_name" {
   description = "Synthetic documents bucket name."
   value       = module.documents.bucket_name

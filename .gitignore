@@ -17,3 +17,6 @@ backend.tf
 .env
 .env.*
 !.env.example
+
+.local/*.json
+!.local/*.example.json

@@ -21,6 +21,12 @@ variable "api_image_uri" {
   type        = string
 }
 
+variable "ecr_repository_name" {
+  description = "ECR repository name for the API image."
+  type        = string
+  default     = "enterprise-ai-agent-reference-api"
+}
+
 variable "documents_bucket_name" {
   description = "Globally unique S3 bucket name for synthetic/sample documents."
   type        = string

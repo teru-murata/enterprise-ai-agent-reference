@@ -15,12 +15,16 @@ def test_aws_deploy_workflow_is_manual_only() -> None:
     assert "id-token: write" in text
     assert "AWS_ACCESS_KEY_ID" not in text
     assert "AWS_SECRET_ACCESS_KEY" not in text
+    assert "default: false" in text
+    assert "terraform apply" in text
+    assert "if: ${{ inputs.apply == true }}" in text
 
 
 def test_terraform_skeleton_files_exist() -> None:
     required_paths = [
         "infra/terraform/README.md",
         "infra/terraform/modules/network/main.tf",
+        "infra/terraform/modules/ecr/main.tf",
         "infra/terraform/modules/ecs_service/main.tf",
         "infra/terraform/modules/rds_pgvector/main.tf",
         "infra/terraform/modules/s3_documents/main.tf",
@@ -32,6 +36,16 @@ def test_terraform_skeleton_files_exist() -> None:
 
     for path in required_paths:
         assert (REPO_ROOT / path).exists(), path
+
+
+def test_local_aws_config_example_exists_and_real_config_is_ignored() -> None:
+    example = REPO_ROOT / ".local" / "aws-dev.example.json"
+    gitignore = (REPO_ROOT / ".gitignore").read_text(encoding="utf-8")
+
+    assert example.exists()
+    assert '"expectedAccountId": "123456789012"' in example.read_text(encoding="utf-8")
+    assert ".local/*.json" in gitignore
+    assert "!.local/*.example.json" in gitignore
 
 
 def test_terraform_examples_do_not_contain_obvious_secrets_or_real_arns() -> None:

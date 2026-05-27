@@ -69,6 +69,8 @@ terraform plan -var="api_image_uri=replace-with-ecr-image-uri"
 
 Copy `backend.tf.example` only after choosing a real remote state bucket and lock table. Do not commit account-specific `backend.tf`, `terraform.tfvars`, state files, or secrets.
 
+The Terraform skeleton includes an ECR module, but the manual deployment workflow expects `ECR_REPOSITORY` to reference an available repository at runtime. Create or import real infrastructure only after preflight, plan review, and explicit approval.
+
 ## pgvector Setup
 
 After RDS PostgreSQL is provisioned, enable pgvector through a controlled migration path:

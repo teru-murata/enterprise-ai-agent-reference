@@ -436,6 +436,7 @@ Key files:
 - `infra/terraform/modules/`
 - `.github/workflows/aws-deploy.yml`
 - `docs/aws-deployment.md`
+- `docs/aws-cli-operations.md`
 
 The deploy workflow is `workflow_dispatch` only. It builds and pushes the API image, runs Terraform init and plan, and applies only when the manual `apply` input is explicitly set to `true`.
 
@@ -445,4 +446,20 @@ Required GitHub repository or environment variables:
 - `AWS_REGION`
 - `ECR_REPOSITORY`
 
-No AWS resources are created by default. Normal CI remains AWS-free, API-key-free, and deterministic.
+No AWS resources are created by default. Normal CI remains AWS-free, API-key-free, and deterministic. The local `.local/aws-dev.json` file is intentionally ignored by git; use `.local/aws-dev.example.json` as a safe template only.
+
+## AWS CLI Preflight Safety Gate
+
+Before any Codex-driven AWS operation, run the AWS CLI preflight with an explicit profile, region, and expected account ID:
+
+```powershell
+.\scripts\aws_preflight.ps1 `
+  -AwsCliPath "C:\Program Files\Amazon\AWSCLIV2\aws.exe" `
+  -Profile enterprise-ai-agent-dev `
+  -Region ap-northeast-1 `
+  -ExpectedAccountId 123456789012
+```
+
+The preflight prints safe caller metadata only and creates no AWS resources. Read-only inventory is available through `scripts/aws_readonly_inventory.ps1` and `scripts/aws_readonly_inventory.sh` after preflight passes.
+
+See `docs/aws-cli-operations.md` for the allowed read-only commands and forbidden commands during the preflight phase.

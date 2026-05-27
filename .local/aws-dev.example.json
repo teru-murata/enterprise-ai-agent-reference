@@ -1,0 +1,8 @@
+{
+  "awsCliPath": "C:\\Program Files\\Amazon\\AWSCLIV2\\aws.exe",
+  "profile": "enterprise-ai-agent-dev",
+  "region": "ap-northeast-1",
+  "ssoStartUrl": "https://example.awsapps.com/start",
+  "ssoRegion": "ap-northeast-1",
+  "expectedAccountId": "123456789012"
+}

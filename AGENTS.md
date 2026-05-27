@@ -73,6 +73,14 @@ Build a minimal but realistic enterprise AI agent reference stack for internal i
 - Do not add broad IAM policies such as `AdministratorAccess`.
 - AWS deployment workflows must remain manual unless explicitly changed.
 - Normal CI must remain AWS-free.
+- Always run AWS preflight before AWS CLI commands.
+- Always use explicit AWS `Profile`, `Region`, and `ExpectedAccountId`.
+- Never run `terraform apply` or `terraform destroy` unless explicitly requested in the current task.
+- Never run destructive AWS commands during preflight or inventory work.
+- Never call `aws secretsmanager get-secret-value` unless explicitly requested in the current task.
+- Never commit AWS credentials, `.env` files, Terraform state, or local Terraform variable files.
+- Do not create AWS resources during the AWS CLI preflight phase.
+- Do not run AWS CLI commands unless the user explicitly requests them in the current task.
 
 ## Backend Commands
 

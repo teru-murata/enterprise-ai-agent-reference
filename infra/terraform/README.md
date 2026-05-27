@@ -8,6 +8,7 @@ No AWS resources are created by this repository unless an operator explicitly co
 
 - `envs/dev`: example development environment composition.
 - `modules/network`: VPC, public/private subnet, and basic routing scaffold.
+- `modules/ecr`: ECR repository scaffold for the API container image.
 - `modules/ecs_service`: ECS Fargate, ALB, task definition, and CloudWatch log group scaffold.
 - `modules/rds_pgvector`: private PostgreSQL RDS scaffold for pgvector-backed retrieval.
 - `modules/s3_documents`: synthetic document bucket scaffold with public access blocked.
