@@ -424,3 +424,19 @@ Example pricing config shape:
 ```
 
 Model-call metadata excludes raw prompts, raw outputs, raw embeddings, API keys, and full user input. It is intended for audit and operational observability scaffolding only.
+
+## AWS CLI Preflight Safety Gate
+
+Before any Codex-driven AWS operation, run the AWS CLI preflight with an explicit profile, region, and expected account ID:
+
+```powershell
+.\scripts\aws_preflight.ps1 `
+  -AwsCliPath "C:\Program Files\Amazon\AWSCLIV2\aws.exe" `
+  -Profile enterprise-ai-agent-dev `
+  -Region ap-northeast-1 `
+  -ExpectedAccountId 123456789012
+```
+
+The preflight prints safe caller metadata only and creates no AWS resources. Read-only inventory is available through `scripts/aws_readonly_inventory.ps1` and `scripts/aws_readonly_inventory.sh` after preflight passes.
+
+See `docs/aws-cli-operations.md` for the allowed read-only commands and forbidden commands during the preflight phase.
