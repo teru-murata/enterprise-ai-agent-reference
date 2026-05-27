@@ -24,7 +24,7 @@ mcp/policy_server/    Policy lookup and action-draft functions
 datasets/             Synthetic source docs and golden eval set
 docs/                 Architecture, eval, security, and AWS planning docs
 scripts/              Local ingestion and evaluation placeholders
-infra/terraform/      Commented AWS infrastructure planning scaffold
+infra/terraform/      AWS Terraform deployment skeleton
 ```
 
 ## Local Development
@@ -101,7 +101,7 @@ terraform init
 terraform validate
 ```
 
-The Terraform files are placeholders only. They do not create real AWS resources yet.
+Terraform is for planning and manual review. Do not run `terraform apply` unless explicitly requested and after reviewing docs/aws-deployment.md.
 
 ## M1 Placeholder RAG
 
@@ -424,6 +424,29 @@ Example pricing config shape:
 ```
 
 Model-call metadata excludes raw prompts, raw outputs, raw embeddings, API keys, and full user input. It is intended for audit and operational observability scaffolding only.
+
+## M9 AWS Deployment Skeleton
+
+The repository now includes an AWS deployment skeleton for a production-oriented enterprise AI agent stack. It covers ECS Fargate, ECR, RDS PostgreSQL with pgvector, S3 synthetic documents, Secrets Manager, CloudWatch, ALB ingress, GitHub Actions OIDC, and Terraform modules.
+
+Key files:
+
+- `infra/terraform/README.md`
+- `infra/terraform/envs/dev/`
+- `infra/terraform/modules/`
+- `.github/workflows/aws-deploy.yml`
+- `docs/aws-deployment.md`
+- `docs/aws-cli-operations.md`
+
+The deploy workflow is `workflow_dispatch` only. It builds and pushes the API image, runs Terraform init and plan, and applies only when the manual `apply` input is explicitly set to `true`.
+
+Required GitHub repository or environment variables:
+
+- `AWS_ROLE_ARN`
+- `AWS_REGION`
+- `ECR_REPOSITORY`
+
+No AWS resources are created by default. Normal CI remains AWS-free, API-key-free, and deterministic. The local `.local/aws-dev.json` file is intentionally ignored by git; use `.local/aws-dev.example.json` as a safe template only.
 
 ## AWS CLI Preflight Safety Gate
 

@@ -12,8 +12,10 @@ def test_aws_cli_safety_scripts_exist() -> None:
     required = [
         "scripts/aws_preflight.ps1",
         "scripts/aws_preflight.sh",
+        "scripts/aws_preflight_from_config.ps1",
         "scripts/aws_readonly_inventory.ps1",
         "scripts/aws_readonly_inventory.sh",
+        "scripts/aws_readonly_inventory_from_config.ps1",
         "docs/aws-cli-operations.md",
     ]
 

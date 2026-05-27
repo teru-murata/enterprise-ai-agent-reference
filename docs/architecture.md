@@ -399,3 +399,43 @@ The observer does not store raw prompts, raw outputs, raw embeddings, API keys, 
 The dataset is intentionally synthetic and small. It supports local demos, ingestion scaffolding, and evaluation examples without exposing customer or production data.
 
 The AWS plan targets ECS Fargate, RDS PostgreSQL with pgvector, S3, ALB, Secrets Manager, CloudWatch, GitHub Actions, and Terraform. No AWS resources are created by the current repository.
+
+## M9 AWS Deployment Skeleton
+
+M9 adds Terraform modules and a manual GitHub Actions workflow for deployment planning:
+
+```text
+GitHub Actions workflow_dispatch
+        |
+        v
+OIDC role assumption
+        |
+        +--> build FastAPI image --> ECR
+        |
+        +--> terraform plan
+                 |
+                 v
+        +-------------------------+
+        | Terraform envs/dev      |
+        +-------------------------+
+          |      |       |      |
+          v      v       v      v
+       Network  ECS    RDS    S3 documents
+          |      |       |      |
+          |      v       v      |
+          |    ALB --> FastAPI  |
+          |             |       |
+          |             v       |
+          |       Secrets Manager
+          |             |
+          v             v
+       CloudWatch logs and future metrics
+```
+
+The deploy workflow is manual-only and does not run during normal CI. Terraform apply is not automatic. RDS PostgreSQL is private by default and requires a later migration step to enable pgvector:
+
+```sql
+CREATE EXTENSION IF NOT EXISTS vector;
+```
+
+Production hardening still needs authentication, TLS, API gateway or WAF design, persistent audit storage, backup policies, final IAM review, and a cost review.

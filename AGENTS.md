@@ -12,7 +12,7 @@ Build a minimal but realistic enterprise AI agent reference stack for internal i
 - `datasets/`: Synthetic markdown documents and golden eval cases.
 - `scripts/`: Placeholder ingestion and eval runners.
 - `docs/`: Architecture, scenario, eval, security, and AWS planning notes.
-- `infra/terraform/`: Commented Terraform scaffold for future AWS deployment.
+- `infra/terraform/`: Terraform AWS deployment skeleton with modules and environment examples.
 
 ## Rules
 
@@ -68,6 +68,11 @@ Build a minimal but realistic enterprise AI agent reference stack for internal i
 - Cost estimates must be null unless explicit pricing config is provided.
 - Model-call observability must preserve safe metadata only.
 - Do not log raw prompts, outputs, embeddings, full user input, or API keys.
+- Do not run `terraform apply` unless explicitly requested by the user.
+- Do not commit Terraform state, `terraform.tfvars`, backend files with account-specific values, AWS credentials, or secrets.
+- Do not add broad IAM policies such as `AdministratorAccess`.
+- AWS deployment workflows must remain manual unless explicitly changed.
+- Normal CI must remain AWS-free.
 - Always run AWS preflight before AWS CLI commands.
 - Always use explicit AWS `Profile`, `Region`, and `ExpectedAccountId`.
 - Never run `terraform apply` or `terraform destroy` unless explicitly requested in the current task.
@@ -75,6 +80,7 @@ Build a minimal but realistic enterprise AI agent reference stack for internal i
 - Never call `aws secretsmanager get-secret-value` unless explicitly requested in the current task.
 - Never commit AWS credentials, `.env` files, Terraform state, or local Terraform variable files.
 - Do not create AWS resources during the AWS CLI preflight phase.
+- Do not run AWS CLI commands unless the user explicitly requests them in the current task.
 
 ## Backend Commands
 
@@ -152,7 +158,13 @@ terraform init
 terraform validate
 ```
 
-Infrastructure is a planning scaffold only. Do not apply Terraform unless the project is explicitly changed to support real deployment.
+Format Terraform when Terraform is installed:
+
+```bash
+terraform fmt -recursive infra/terraform
+```
+
+Infrastructure is a planning scaffold only. Do not apply Terraform unless explicitly requested. Deployment workflows must use GitHub Actions OIDC, not static AWS access keys.
 
 ## Review Guidelines
 
