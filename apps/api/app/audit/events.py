@@ -9,6 +9,13 @@ SAFE_METADATA_KEYS = {
     "answer_provider",
     "classification_intent",
     "classification_severity",
+    "estimated_cost_usd",
+    "input_tokens",
+    "latency_ms",
+    "model",
+    "model_call_status",
+    "operation",
+    "output_tokens",
     "query_length",
     "question_length",
     "result_count",
@@ -18,9 +25,11 @@ SAFE_METADATA_KEYS = {
     "requires_human_review",
     "citation_count",
     "retrieved_count",
+    "service_tier",
     "ticket_status",
     "tool_name",
     "tool_mode",
+    "total_tokens",
     "workflow_type",
 }
 
@@ -87,7 +96,30 @@ def create_answer_draft_audit_event(
     citation_count: int,
     requires_human_review: bool,
     answer_provider: str | None = None,
+    model_call: dict[str, object] | None = None,
 ) -> dict[str, object]:
+    model_metadata: dict[str, object] = {}
+    if model_call:
+        usage = model_call.get("usage", {})
+        if isinstance(usage, dict):
+            model_metadata.update(
+                {
+                    "input_tokens": usage.get("input_tokens"),
+                    "output_tokens": usage.get("output_tokens"),
+                    "total_tokens": usage.get("total_tokens"),
+                }
+            )
+        model_metadata.update(
+            {
+                "model": model_call.get("model"),
+                "operation": model_call.get("operation"),
+                "latency_ms": model_call.get("latency_ms"),
+                "service_tier": model_call.get("service_tier"),
+                "estimated_cost_usd": model_call.get("estimated_cost_usd"),
+                "model_call_status": model_call.get("status"),
+            }
+        )
+
     return create_audit_event(
         event_type="answer_draft",
         status="completed",
@@ -97,6 +129,7 @@ def create_answer_draft_audit_event(
             "citation_count": citation_count,
             "requires_human_review": requires_human_review,
             "answer_provider": answer_provider,
+            **model_metadata,
         },
     )
 

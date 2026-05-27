@@ -177,3 +177,16 @@ Normal answer evals remain deterministic and API-key free. Optional OpenAI answe
 - insufficient-evidence success rate at `1.0`.
 
 Expected term coverage and groundedness proxy are reported because model answers may paraphrase retrieved context.
+
+## M8.6 Operational Observability Metrics
+
+Model-call observability adds operational metrics, not answer-quality metrics:
+
+- latency.
+- token usage.
+- estimated cost when explicit pricing config is provided.
+- model and provider.
+- operation name.
+- service tier where available.
+
+These values help compare operating characteristics of optional model paths. They do not replace retrieval, answer-quality, or workflow safety eval thresholds.

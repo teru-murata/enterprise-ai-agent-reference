@@ -64,6 +64,10 @@ Build a minimal but realistic enterprise AI agent reference stack for internal i
 - Deterministic answer composition remains the default.
 - Guardrail-blocked inputs must not call OpenAI.
 - Model-generated answers must keep `requires_human_review: true`.
+- Do not hardcode live model pricing.
+- Cost estimates must be null unless explicit pricing config is provided.
+- Model-call observability must preserve safe metadata only.
+- Do not log raw prompts, outputs, embeddings, full user input, or API keys.
 
 ## Backend Commands
 

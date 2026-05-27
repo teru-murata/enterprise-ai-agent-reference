@@ -397,3 +397,30 @@ OPENAI_API_KEY=... ANSWER_PROVIDER=openai python scripts/run_openai_answer_evals
 ```
 
 Guardrails run before any OpenAI answer call. Guardrail-blocked inputs do not call OpenAI. Citations are derived from retrieved chunks by the application, and every generated draft keeps `requires_human_review: true`.
+
+## M8.6 Model-call Observability
+
+Optional OpenAI model calls now return safe observability metadata:
+
+- `latency_ms`
+- token usage when returned by the provider
+- provider, operation, model, and service tier metadata
+- response/request identifiers when available
+- cost-estimate placeholders
+
+Current OpenAI pricing is not hardcoded. Cost estimates are `null` unless `MODEL_PRICING_CONFIG_JSON` is explicitly provided.
+
+Example pricing config shape:
+
+```json
+{
+  "openai": {
+    "some-model-name": {
+      "input_per_1m_tokens_usd": 0.0,
+      "output_per_1m_tokens_usd": 0.0
+    }
+  }
+}
+```
+
+Model-call metadata excludes raw prompts, raw outputs, raw embeddings, API keys, and full user input. It is intended for audit and operational observability scaffolding only.
