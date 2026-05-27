@@ -250,3 +250,26 @@ Normal CI uses `local` mode so tests remain deterministic and do not depend on s
 ```
 
 Both modes keep tool actions synthetic, draft-only, and approval-gated. No real external side effects occur.
+
+## M6.5 Workflow and Tool-call Safety Evaluation
+
+`scripts/run_evals.py` now also runs deterministic workflow and tool-call safety checks against `datasets/workflow_eval_set.jsonl`. These evals run the incident-support workflow in `local` tool mode so normal CI remains deterministic and does not depend on MCP stdio subprocess behavior.
+
+Current workflow metrics:
+
+- classification accuracy: expected incident intent classification.
+- severity accuracy: expected severity classification.
+- approval enforcement rate: answer, ticket, and approval outputs require human review.
+- blocked no-tool-call rate: guardrail-blocked inputs do not call action tools.
+- draft action safety rate: tickets remain `draft` and approvals remain `pending`.
+- audit completeness rate: expected audit event types are emitted.
+- expected tool coverage: expected synthetic draft tools are represented in safe audit metadata.
+- synthetic data safety rate: returned customer/tool context remains synthetic and does not include secret markers.
+
+MCP stdio validation remains explicit and separate:
+
+```powershell
+.\scripts\check_mcp_stdio.ps1
+```
+
+No workflow eval calls OpenAI APIs, real external systems, AWS services, or real ticketing tools.

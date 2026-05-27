@@ -240,6 +240,31 @@ incident-support agent
 
 Local mode is the default for normal CI. Stdio mode is available through `tool_mode: "mcp-stdio"` and explicit validation scripts.
 
+## M6.5 Workflow Eval Flow
+
+Workflow and tool-call safety evals exercise the incident-support workflow with synthetic cases:
+
+```text
+datasets/workflow_eval_set.jsonl
+        |
+        v
+ incident-support workflow
+        |
+        v
+ local MCP bridge mode
+        |
+        v
+ classification + draft tools + audit events
+        |
+        v
+ workflow metrics
+        |
+        v
+ CI and local check script
+```
+
+The eval path checks classification, approval enforcement, blocked no-tool-call behavior, draft-only action safety, audit completeness, expected tool coverage, and synthetic-only returned data. It does not require MCP stdio mode, model calls, external tools, or persistent audit storage.
+
 The dataset is intentionally synthetic and small. It supports local demos, ingestion scaffolding, and evaluation examples without exposing customer or production data.
 
 The AWS plan targets ECS Fargate, RDS PostgreSQL with pgvector, S3, ALB, Secrets Manager, CloudWatch, GitHub Actions, and Terraform. No AWS resources are created by the current repository.
