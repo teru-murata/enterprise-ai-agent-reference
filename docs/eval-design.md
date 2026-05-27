@@ -165,3 +165,15 @@ Normal evals remain deterministic:
 - `scripts/run_openai_pgvector_evals.py` uses OpenAI embeddings and requires explicit API-key configuration.
 
 `scripts/compare_retrieval_modes.py` provides reporting across keyword, deterministic pgvector, and optionally OpenAI pgvector modes. It is not a quality gate and marks unavailable optional modes as skipped.
+
+## M8.5 OpenAI Answer Evals
+
+M8.5 adds optional OpenAI answer evaluation through `scripts/run_openai_answer_evals.py`. The script requires `OPENAI_API_KEY`, uses keyword retrieval over synthetic documents, generates answer drafts with the OpenAI Responses API, and evaluates them with the existing deterministic answer-quality checks.
+
+Normal answer evals remain deterministic and API-key free. Optional OpenAI answer evals currently gate:
+
+- human review rate at `1.0`.
+- citation coverage at `1.0`.
+- insufficient-evidence success rate at `1.0`.
+
+Expected term coverage and groundedness proxy are reported because model answers may paraphrase retrieved context.

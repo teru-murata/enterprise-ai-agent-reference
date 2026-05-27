@@ -6,6 +6,7 @@ from uuid import uuid4
 
 SAFE_METADATA_KEYS = {
     "approval_status",
+    "answer_provider",
     "classification_intent",
     "classification_severity",
     "query_length",
@@ -85,6 +86,7 @@ def create_answer_draft_audit_event(
     retrieved_count: int,
     citation_count: int,
     requires_human_review: bool,
+    answer_provider: str | None = None,
 ) -> dict[str, object]:
     return create_audit_event(
         event_type="answer_draft",
@@ -94,6 +96,7 @@ def create_answer_draft_audit_event(
             "retrieved_count": retrieved_count,
             "citation_count": citation_count,
             "requires_human_review": requires_human_review,
+            "answer_provider": answer_provider,
         },
     )
 

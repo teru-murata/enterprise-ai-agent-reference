@@ -95,4 +95,17 @@ The OpenAI embedding provider is explicit and API-key gated:
 - No real customer data, production documents, or secrets may be sent to OpenAI.
 - No text generation or autonomous action execution is added in this phase.
 
+## M8.5 Model-call Safety Boundary
+
+OpenAI answer generation is guarded by the same safety controls:
+
+- Guardrails run before model calls.
+- Guardrail-blocked inputs do not call OpenAI.
+- `OPENAI_API_KEY` is read from the environment only.
+- API keys and raw prompts are not logged by default.
+- Retrieved context is synthetic-only in this repository.
+- Citations are assigned from retrieved chunks by application code.
+- All model-generated drafts require human review.
+- No real tool execution or autonomous action is added.
+
 Future production work should add authentication, authorization, least-privilege service roles, structured audit events, retention controls, and security review before deployment.

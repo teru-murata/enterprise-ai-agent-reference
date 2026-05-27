@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
 from app.agents.incident_support import run_incident_support_workflow
-from app.answers.composer import compose_grounded_answer
+from app.answers.providers import compose_answer, get_answer_provider
 from app.audit.events import (
     create_answer_draft_audit_event,
     create_audit_event,
@@ -30,6 +30,7 @@ app = FastAPI(
 
 class AnswerDraftRequest(BaseModel):
     question: str
+    answer_provider: str = "deterministic"
 
 
 class IncidentSupportRequest(BaseModel):
@@ -37,6 +38,7 @@ class IncidentSupportRequest(BaseModel):
     customer_id: str = "synthetic-customer-001"
     severity_hint: str | None = None
     tool_mode: str = "local"
+    answer_provider: str = "deterministic"
 
 
 @app.get("/health")
@@ -130,6 +132,11 @@ def answer_draft(request: AnswerDraftRequest) -> dict[str, object]:
     if not question.strip():
         raise HTTPException(status_code=400, detail="question must not be empty")
 
+    try:
+        answer_provider = get_answer_provider(request.answer_provider)
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
+
     guardrail_result = analyze_user_input(question)
     guardrail_event = create_guardrail_audit_event(
         subject="answer_draft",
@@ -140,6 +147,7 @@ def answer_draft(request: AnswerDraftRequest) -> dict[str, object]:
         return {
             "question": question,
             "retrieval_mode": "keyword-placeholder",
+            "answer_provider": answer_provider,
             "answer": "Safety response: the question was blocked by deterministic guardrail checks.",
             "confidence": "low",
             "citations": [],
@@ -162,6 +170,7 @@ def answer_draft(request: AnswerDraftRequest) -> dict[str, object]:
                         "risk_level": guardrail_result["risk_level"],
                         "flags": guardrail_result["flags"],
                         "requires_human_review": True,
+                        "answer_provider": answer_provider,
                     },
                 ),
             ],
@@ -170,7 +179,14 @@ def answer_draft(request: AnswerDraftRequest) -> dict[str, object]:
     documents = load_sample_documents()
     chunks = split_into_chunks(documents)
     retrieved_chunks = retrieve_keyword_matches(query=question, chunks=chunks)
-    draft = compose_grounded_answer(question=question, retrieved_chunks=retrieved_chunks)
+    try:
+        draft = compose_answer(
+            question=question,
+            retrieved_chunks=retrieved_chunks,
+            provider=answer_provider,
+        )
+    except RuntimeError as error:
+        raise HTTPException(status_code=502, detail=str(error)) from error
     audit_events = [
         guardrail_event,
         create_retrieval_audit_event(
@@ -183,12 +199,14 @@ def answer_draft(request: AnswerDraftRequest) -> dict[str, object]:
             retrieved_count=len(retrieved_chunks),
             citation_count=len(draft["citations"]),
             requires_human_review=bool(draft["requires_human_review"]),
+            answer_provider=answer_provider,
         ),
     ]
 
     return {
         "question": draft["question"],
         "retrieval_mode": "keyword-placeholder",
+        "answer_provider": answer_provider,
         "answer": draft["answer"],
         "confidence": draft["confidence"],
         "citations": draft["citations"],

@@ -58,6 +58,12 @@ Build a minimal but realistic enterprise AI agent reference stack for internal i
 - Do not send real customer data, production documents, or secrets to OpenAI.
 - OpenAI embedding tests must be gated with `RUN_OPENAI_EMBEDDING_TESTS=1` or explicit scripts.
 - The deterministic embedding provider remains the default.
+- Do not call OpenAI answer generation in normal tests, normal CI, app startup, or default evals.
+- OpenAI answer tests must be gated with `RUN_OPENAI_ANSWER_TESTS=1` or explicit scripts.
+- Do not print raw prompts by default.
+- Deterministic answer composition remains the default.
+- Guardrail-blocked inputs must not call OpenAI.
+- Model-generated answers must keep `requires_human_review: true`.
 
 ## Backend Commands
 
@@ -107,6 +113,12 @@ Run OpenAI embedding validation only when explicitly requested and `OPENAI_API_K
 
 ```bash
 python scripts/run_openai_pgvector_evals.py
+```
+
+Run OpenAI answer validation only when explicitly requested and `OPENAI_API_KEY` is available:
+
+```bash
+python scripts/run_openai_answer_evals.py
 ```
 
 Do not weaken eval thresholds without documenting why in the same change.

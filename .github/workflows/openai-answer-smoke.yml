@@ -1,0 +1,22 @@
+name: OpenAI answer smoke
+
+on:
+  workflow_dispatch:
+
+jobs:
+  openai-answer-smoke:
+    runs-on: ubuntu-latest
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      ANSWER_PROVIDER: openai
+      OPENAI_TEXT_MODEL: gpt-5.2
+      OPENAI_REASONING_EFFORT: low
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install -e ".[dev]"
+        working-directory: apps/api
+      - run: bash scripts/check_openai_answer_generation.sh
