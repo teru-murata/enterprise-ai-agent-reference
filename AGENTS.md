@@ -45,6 +45,10 @@ Build a minimal but realistic enterprise AI agent reference stack for internal i
 - Do not weaken workflow eval thresholds without documenting why.
 - Blocked guardrail cases must not call action tools.
 - Tool and action outputs must remain draft-only or pending and approval-gated.
+- Do not commit database credentials, `.env` files, database dumps, or Terraform state.
+- Do not make normal CI depend on Docker, PostgreSQL, or pgvector.
+- pgvector integration tests must be gated behind an explicit environment variable or validation script.
+- Do not replace deterministic keyword evals without preserving existing thresholds.
 
 ## Backend Commands
 
@@ -78,7 +82,7 @@ ruff check .
 
 After changes, run the focused commands for touched areas and then the full local validation when dependencies are installed.
 
-Run evals after any RAG, retrieval, chunking, document loading, answer composition, guardrail, audit, agent workflow, MCP bridge, tool logic, or eval logic change:
+Run evals after any RAG, retrieval, chunking, document loading, answer composition, guardrail, audit, agent workflow, MCP bridge, tool logic, pgvector logic, or eval logic change:
 
 ```bash
 python scripts/run_evals.py

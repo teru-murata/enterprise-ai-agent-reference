@@ -265,6 +265,37 @@ datasets/workflow_eval_set.jsonl
 
 The eval path checks classification, approval enforcement, blocked no-tool-call behavior, draft-only action safety, audit completeness, expected tool coverage, and synthetic-only returned data. It does not require MCP stdio mode, model calls, external tools, or persistent audit storage.
 
+## M7 Local pgvector Retrieval Flow
+
+The optional pgvector path demonstrates vector database architecture while keeping normal CI keyword-based:
+
+```text
+datasets/sample_docs
+        |
+        v
+ document loader
+        |
+        v
+ deterministic chunker
+        |
+        v
+ deterministic placeholder embeddings
+        |
+        v
+ PostgreSQL + pgvector
+        |
+        v
+ GET /rag/search?mode=pgvector
+```
+
+Future production retrieval can replace placeholder embeddings with real embedding models:
+
+```text
+real embedding model -> pgvector -> answer composer / agent workflow
+```
+
+The current pgvector integration is local development only. It does not run in normal CI, does not call external model APIs, and stores only synthetic sample documents.
+
 The dataset is intentionally synthetic and small. It supports local demos, ingestion scaffolding, and evaluation examples without exposing customer or production data.
 
 The AWS plan targets ECS Fargate, RDS PostgreSQL with pgvector, S3, ALB, Secrets Manager, CloudWatch, GitHub Actions, and Terraform. No AWS resources are created by the current repository.

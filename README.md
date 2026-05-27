@@ -273,3 +273,32 @@ MCP stdio validation remains explicit and separate:
 ```
 
 No workflow eval calls OpenAI APIs, real external systems, AWS services, or real ticketing tools.
+
+## M7 PostgreSQL + pgvector Local Retrieval
+
+The backend now includes optional local PostgreSQL + pgvector retrieval support. Keyword retrieval remains the default for normal CI, evals, answer drafting, and agent workflows.
+
+Retrieval modes:
+
+- `GET /rag/search?query=incident&mode=keyword`: default deterministic in-memory keyword retrieval.
+- `GET /rag/search?query=incident&mode=pgvector`: explicit local pgvector retrieval.
+
+The pgvector path uses deterministic placeholder embeddings from `apps/api/app/rag/embeddings.py`. These vectors are hash/token based and exist only to demonstrate vector DB architecture. No OpenAI API, external embedding service, model call, or real customer data is used.
+
+Local Docker Compose can start the pgvector-capable database:
+
+```bash
+docker compose up -d postgres
+```
+
+Explicit pgvector validation:
+
+```powershell
+.\scripts\check_pgvector.ps1
+```
+
+```bash
+./scripts/check_pgvector.sh
+```
+
+The local defaults are development-only (`app` / `app` / `enterprise_ai_agent`). Do not commit `.env` files or real `DATABASE_URL` values.
