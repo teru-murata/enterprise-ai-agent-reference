@@ -65,4 +65,14 @@ The MCP client bridge preserves the same action boundary:
 - Normal CI uses deterministic local mode.
 - Stdio MCP validation is explicit and does not call external APIs.
 
+## M6.5 Workflow Safety Metrics
+
+Workflow evals now check safety behavior directly:
+
+- Guardrail-blocked inputs must not call customer-context, ticket-draft, or approval-request tools.
+- Approval enforcement must remain enabled across answer drafts, ticket drafts, approval requests, and blocked safety responses.
+- Draft action safety requires ticket outputs to remain `draft` and approval outputs to remain `pending`.
+- Audit completeness checks that guardrail, classification, retrieval, answer draft, customer-context, ticket-draft, and approval-request events are emitted where expected.
+- Synthetic data safety checks returned tool/context payloads for synthetic-only classification and obvious secret markers.
+
 Future production work should add authentication, authorization, least-privilege service roles, structured audit events, retention controls, and security review before deployment.

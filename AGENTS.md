@@ -41,6 +41,10 @@ Build a minimal but realistic enterprise AI agent reference stack for internal i
 - Do not make normal CI depend on flaky MCP subprocess tests.
 - MCP bridge changes must preserve local deterministic mode.
 - Any MCP tool action must remain draft-only and approval-gated.
+- Workflow evals must run after changes to agents, guardrails, audit, MCP bridge, or tool logic.
+- Do not weaken workflow eval thresholds without documenting why.
+- Blocked guardrail cases must not call action tools.
+- Tool and action outputs must remain draft-only or pending and approval-gated.
 
 ## Backend Commands
 
@@ -74,7 +78,7 @@ ruff check .
 
 After changes, run the focused commands for touched areas and then the full local validation when dependencies are installed.
 
-Run evals after any RAG, retrieval, chunking, document loading, answer composition, guardrail, audit, agent workflow, or eval logic change:
+Run evals after any RAG, retrieval, chunking, document loading, answer composition, guardrail, audit, agent workflow, MCP bridge, tool logic, or eval logic change:
 
 ```bash
 python scripts/run_evals.py

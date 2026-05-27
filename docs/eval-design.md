@@ -110,3 +110,18 @@ M5 adds an official MCP SDK server, but protocol-level and agent-to-MCP evals ar
 - synthetic-only customer context.
 
 M6 adds a local/default MCP bridge path plus an explicit stdio integration path. Future workflow and tool-call evals should also verify that blocked input avoids tool calls and that audit events fully capture bridge mode, tool intent, and approval state.
+
+## M6.5 Workflow And Tool-call Safety Evaluation
+
+M6.5 adds deterministic workflow and tool-call safety evaluation before any model calls or real integrations are introduced. The workflow eval set lives in `datasets/workflow_eval_set.jsonl` and uses synthetic incident-support cases only.
+
+The evaluation layers are now:
+
+- Retrieval evaluation: verifies expected source documents are returned by keyword retrieval.
+- Deterministic answer evaluation: verifies citation coverage, expected answer terms, insufficient-evidence handling, groundedness proxy, and human review.
+- Workflow and tool-call safety evaluation: verifies classification, severity, approval enforcement, blocked no-tool-call behavior, draft-only action status, audit completeness, expected synthetic tool coverage, and synthetic-only returned context.
+- Future LLM-as-a-judge evaluation: planned later for non-deterministic qualitative answer and workflow review.
+
+Workflow evals use `tool_mode="local"` by default. MCP stdio validation remains an explicit separate script so normal CI does not depend on subprocess lifecycle behavior.
+
+Workflow evaluation is added before model calls or real integrations because it locks down the safety contract first: blocked inputs must not trigger action tools, action outputs must remain draft-only or pending, approval must remain mandatory, and audit events must capture workflow steps with safe metadata.

@@ -26,7 +26,7 @@ def classify_incident(message: str, severity_hint: str | None = None) -> dict[st
 
     if any(term in normalized for term in ("access", "authentication logs", "sensitive", "artifact")):
         intent = "access-control-sensitive"
-    elif any(term in normalized for term in ("ticket", "customer", "support")):
+    elif any(term in normalized for term in ("ticket", "support")):
         intent = "support-ticket-draft"
     elif any(term in normalized for term in ("incident", "outage", "severity", "degradation")):
         intent = "incident-guidance"
@@ -180,6 +180,7 @@ def run_incident_support_workflow(request: dict[str, object]) -> dict[str, objec
             metadata={
                 "workflow_type": workflow_type,
                 "tool_mode": tool_mode,
+                "tool_name": "get_customer_context",
             },
         )
     )
@@ -197,6 +198,7 @@ def run_incident_support_workflow(request: dict[str, object]) -> dict[str, objec
             metadata={
                 "workflow_type": workflow_type,
                 "tool_mode": tool_mode,
+                "tool_name": "create_ticket_draft",
                 "ticket_status": ticket_draft["status"],
                 "classification_severity": classification["severity"],
                 "requires_human_review": True,
@@ -217,6 +219,7 @@ def run_incident_support_workflow(request: dict[str, object]) -> dict[str, objec
             metadata={
                 "workflow_type": workflow_type,
                 "tool_mode": tool_mode,
+                "tool_name": "request_approval",
                 "approval_status": approval_request["status"],
                 "requires_human_review": True,
             },
