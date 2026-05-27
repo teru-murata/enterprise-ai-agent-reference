@@ -5,6 +5,12 @@ aws_region = "us-east-1"
 
 api_image_uri = "replace-with-ecr-image-uri"
 
+allowed_http_cidrs = [
+  "203.0.113.10/32",
+]
+
+ecs_assign_public_ip = true
+
 ecr_repository_name = "enterprise-ai-agent-reference-api"
 
 documents_bucket_name = "replace-with-globally-unique-synthetic-documents-bucket"
@@ -16,3 +22,7 @@ availability_zones = [
 
 embedding_provider = "deterministic"
 answer_provider    = "deterministic"
+
+rds_deletion_protection     = false
+rds_skip_final_snapshot     = true
+rds_backup_retention_period = 1

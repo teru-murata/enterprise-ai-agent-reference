@@ -13,7 +13,7 @@ resource "aws_security_group" "alb" {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = var.allowed_http_cidrs
   }
 
   egress {
@@ -138,20 +138,36 @@ resource "aws_iam_role" "execution" {
 
 data "aws_iam_policy_document" "execution_runtime" {
   statement {
-    sid = "PullImageAndWriteLogs"
+    sid = "GetEcrAuthorizationToken"
+
+    actions = [
+      "ecr:GetAuthorizationToken",
+    ]
+
+    resources = ["*"]
+  }
+
+  statement {
+    sid = "PullImageFromConfiguredRepository"
 
     actions = [
       "ecr:BatchCheckLayerAvailability",
       "ecr:BatchGetImage",
-      "ecr:GetAuthorizationToken",
       "ecr:GetDownloadUrlForLayer",
+    ]
+
+    resources = [var.ecr_repository_arn]
+  }
+
+  statement {
+    sid = "WriteApiContainerLogs"
+
+    actions = [
       "logs:CreateLogStream",
       "logs:PutLogEvents",
     ]
 
-    # These actions are intentionally narrow. Resource scoping should be tightened
-    # to exact ECR repository and log group ARNs during real deployment hardening.
-    resources = ["*"]
+    resources = ["${aws_cloudwatch_log_group.api.arn}:*"]
   }
 }
 

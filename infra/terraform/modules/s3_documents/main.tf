@@ -4,7 +4,7 @@ resource "aws_s3_bucket" "documents" {
   tags = {
     Application = var.app_name
     Environment = var.environment
-    DataClass    = "synthetic"
+    DataClass   = "synthetic"
   }
 }
 

@@ -23,8 +23,18 @@ variable "subnet_ids" {
   type        = list(string)
 }
 
+variable "allowed_http_cidrs" {
+  description = "CIDR ranges allowed to reach the ALB HTTP listener. Use narrow ranges for apply review."
+  type        = list(string)
+}
+
 variable "image_uri" {
   description = "Container image URI in ECR. Use a real value only during deployment."
+  type        = string
+}
+
+variable "ecr_repository_arn" {
+  description = "ECR repository ARN used to scope ECS image pull permissions."
   type        = string
 }
 
@@ -80,7 +90,7 @@ variable "documents_bucket_arn" {
 }
 
 variable "assign_public_ip" {
-  description = "Whether Fargate tasks receive public IPs. Prefer false with private subnets in production."
+  description = "Whether Fargate tasks receive public IPs. True is dev convenience; false is preferred with private subnets and egress design."
   type        = bool
   default     = true
 }

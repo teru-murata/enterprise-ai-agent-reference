@@ -201,3 +201,5 @@ The AWS deployment skeleton does not change deterministic eval thresholds. Norma
 - static safety checks for deployment scaffolding
 
 Future production deployments should schedule evals before and after releases, publish eval status to CloudWatch or a CI summary, and track operational signals such as request latency, guardrail blocks, model-call latency, token usage, and estimated cost. These deployment metrics should complement, not replace, the existing quality and safety gates.
+
+M9.1 apply-readiness hardening does not change retrieval, answer-quality, or workflow eval thresholds. Deployment review should include confirmation that eval gates are green before any explicitly approved apply, and production should eventually schedule recurring eval runs after deployment.
