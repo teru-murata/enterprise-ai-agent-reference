@@ -1,0 +1,16 @@
+# Example values only. Copy to terraform.tfvars locally and replace placeholders.
+# Do not commit terraform.tfvars, real account IDs, real ARNs, or secrets.
+
+aws_region = "us-east-1"
+
+api_image_uri = "replace-with-ecr-image-uri"
+
+documents_bucket_name = "replace-with-globally-unique-synthetic-documents-bucket"
+
+availability_zones = [
+  "us-east-1a",
+  "us-east-1b",
+]
+
+embedding_provider = "deterministic"
+answer_provider    = "deterministic"

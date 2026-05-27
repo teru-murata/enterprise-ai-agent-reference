@@ -1,0 +1,79 @@
+name: AWS deploy plan
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "GitHub environment and Terraform environment name."
+        required: true
+        default: "dev"
+        type: choice
+        options:
+          - dev
+      apply:
+        description: "Apply the reviewed Terraform plan. Leave false unless explicitly approved."
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy-plan:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION }}
+      AWS_ROLE_ARN: ${{ vars.AWS_ROLE_ARN }}
+      ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
+      TF_WORKING_DIR: infra/terraform/envs/dev
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate required deployment variables
+        run: |
+          test -n "$AWS_REGION"
+          test -n "$AWS_ROLE_ARN"
+          test -n "$ECR_REPOSITORY"
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - uses: aws-actions/amazon-ecr-login@v2
+        id: ecr
+
+      - name: Build and push API image
+        env:
+          REGISTRY: ${{ steps.ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          IMAGE_URI="$REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          docker build -f apps/api/Dockerfile -t "$IMAGE_URI" apps/api
+          docker push "$IMAGE_URI"
+          echo "IMAGE_URI=$IMAGE_URI" >> "$GITHUB_ENV"
+
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform init
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform init
+
+      - name: Terraform plan
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        env:
+          DOCS_BUCKET: ${{ github.repository_owner }}-${{ github.event.repository.name }}-${{ inputs.environment }}-synthetic-documents
+        run: |
+          terraform plan \
+            -out=tfplan \
+            -var="api_image_uri=$IMAGE_URI" \
+            -var="documents_bucket_name=$DOCS_BUCKET" \
+            -var='availability_zones=["${{ env.AWS_REGION }}a","${{ env.AWS_REGION }}b"]'
+
+      - name: Terraform apply
+        if: ${{ inputs.apply == true }}
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform apply -auto-approve tfplan

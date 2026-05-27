@@ -10,6 +10,9 @@ dist/
 .terraform/
 *.tfstate
 *.tfstate.*
+terraform.tfvars
+terraform.tfvars.json
+backend.tf
 
 .env
 .env.*

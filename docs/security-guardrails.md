@@ -120,3 +120,18 @@ Model-call observability must stay metadata-only:
 - Cost estimates are null unless explicit pricing config is provided.
 
 Future production work should add authentication, authorization, least-privilege service roles, structured audit events, retention controls, and security review before deployment.
+
+## M9 AWS Deployment Safety
+
+The AWS deployment skeleton keeps cloud execution explicit:
+
+- No static AWS access keys are used by GitHub Actions.
+- GitHub Actions OIDC is the preferred authentication path.
+- The deploy workflow is manual-only.
+- Terraform apply is disabled by default and requires an explicit manual input.
+- OpenAI and database secrets belong in Secrets Manager, not source control.
+- S3 public access is blocked for the synthetic document bucket.
+- RDS is not publicly accessible by default.
+- Terraform state, `terraform.tfvars`, `.env` files, AWS credentials, and secret values must not be committed.
+- ALB exposure is only a skeleton; production use requires TLS, authentication, rate limiting, and API gateway or WAF review.
+- Audit persistence is not implemented yet, so regulated production usage is out of scope.
